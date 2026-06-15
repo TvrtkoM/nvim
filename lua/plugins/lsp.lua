@@ -77,7 +77,10 @@ return {
     require("mason-lspconfig").setup({
       -- Auto-install these servers if missing. vtsls = TypeScript/JS,
       -- lua_ls = Lua (so editing this config gets LSP too).
-      ensure_installed = { "vtsls", "lua_ls" },
+      -- vtsls = TS/JS, lua_ls = Lua, eslint = project ESLint diagnostics
+      -- (warnings only; attaches only when the project has an ESLint config,
+      -- and does NOT auto-fix unless its fixAll code action is wired to save).
+      ensure_installed = { "vtsls", "lua_ls", "eslint" },
       -- automatic_enable = true is the default: mason-lspconfig calls
       -- vim.lsp.enable() for each installed server, so we don't have to.
     })

@@ -22,7 +22,9 @@ return {
     cmd = { "ConformInfo" },
     keys = {
       {
-        "<leader>f",
+        -- Moved off <leader>f to avoid clashing with the <leader>f find group
+        -- (which-key). "cf" = code format.
+        "<leader>cf",
         function()
           require("conform").format({ async = true, lsp_format = "fallback" })
         end,
