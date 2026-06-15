@@ -1,0 +1,79 @@
+-- Formatting via conform.nvim. It runs a real formatter (prettierd) per
+-- filetype, honoring your project's .prettierrc / prettier.config.js if present.
+-- This file returns TWO plugin specs: conform itself, and a helper that makes
+-- Mason auto-install the prettierd binary (Mason's own auto-install only covers
+-- LSP servers, not formatters).
+
+return {
+  -- 1. Auto-install non-LSP tools (formatters/linters) through Mason.
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = { "mason-org/mason.nvim" },
+    opts = {
+      ensure_installed = { "prettierd" },
+    },
+  },
+
+  -- 2. The formatter runner.
+  {
+    "stevearc/conform.nvim",
+    -- Load right before a write (for format-on-save) or when used manually.
+    event = { "BufWritePre" },
+    cmd = { "ConformInfo" },
+    keys = {
+      {
+        "<leader>f",
+        function()
+          require("conform").format({ async = true, lsp_format = "fallback" })
+        end,
+        mode = { "n", "v" },
+        desc = "Format buffer/selection",
+      },
+    },
+    opts = {
+      -- Which formatter to run for each filetype. prettierd is the Prettier
+      -- daemon (kept warm in the background = near-instant formatting).
+      formatters_by_ft = {
+        javascript = { "prettierd" },
+        javascriptreact = { "prettierd" },
+        typescript = { "prettierd" },
+        typescriptreact = { "prettierd" },
+        json = { "prettierd" },
+        jsonc = { "prettierd" },
+        css = { "prettierd" },
+        html = { "prettierd" },
+        markdown = { "prettierd" },
+        yaml = { "prettierd" },
+      },
+
+      -- Format on save. Returns nil (skip) when a toggle flag is set, so you
+      -- can disable it globally or per-buffer (see the commands below).
+      format_on_save = function(bufnr)
+        if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+          return
+        end
+        -- lsp_format = "fallback": if no prettierd for this ft, let the LSP
+        -- format instead. timeout guards against a hung formatter on save.
+        return { timeout_ms = 1000, lsp_format = "fallback" }
+      end,
+    },
+    config = function(_, opts)
+      require("conform").setup(opts)
+
+      -- :FormatDisable  -> turn off format-on-save (add ! for current buffer only)
+      -- :FormatEnable   -> turn it back on
+      vim.api.nvim_create_user_command("FormatDisable", function(args)
+        if args.bang then
+          vim.b.disable_autoformat = true
+        else
+          vim.g.disable_autoformat = true
+        end
+      end, { desc = "Disable format-on-save", bang = true })
+
+      vim.api.nvim_create_user_command("FormatEnable", function()
+        vim.b.disable_autoformat = false
+        vim.g.disable_autoformat = false
+      end, { desc = "Re-enable format-on-save" })
+    end,
+  },
+}
