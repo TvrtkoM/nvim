@@ -11,6 +11,7 @@ return {
       { "<leader>f", group = "find" }, -- Telescope pickers
       { "<leader>c", group = "code" }, -- code action / format
       { "<leader>g", group = "git" }, -- gitsigns hunk actions
+      { "<leader>a", group = "ai" }, -- Claude Code
     },
   },
   keys = {
