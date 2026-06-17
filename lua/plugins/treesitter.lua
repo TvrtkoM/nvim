@@ -18,6 +18,8 @@ local filetypes = {
   "vim",
   "markdown",
   "bash",
+  "haskell",       -- also covers TidalCycles: tidal.nvim sets .tidal files to filetype=haskell
+  "supercollider", -- .scd SuperCollider files (SuperDirt sound engine)
 }
 
 -- Parsers/queries to install. (Treesitter parser names — note these differ
@@ -44,6 +46,8 @@ local parsers = {
   "markdown",
   "markdown_inline",
   "bash",
+  "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
+  "supercollider", -- SuperDirt / SuperCollider .scd files
 }
 
 return {

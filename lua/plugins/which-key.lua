@@ -12,6 +12,7 @@ return {
       { "<leader>c", group = "code" }, -- code action / format
       { "<leader>g", group = "git" }, -- gitsigns hunk actions
       { "<leader>a", group = "ai" }, -- Claude Code
+      { "<leader>t", group = "tidal" }, -- TidalCycles send/silence
     },
   },
   keys = {
