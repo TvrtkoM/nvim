@@ -19,9 +19,9 @@ return {
   -- BufReadPre/BufNewFile of *.tidal runs setup() before BufWinEnter, so the
   -- plugin's autocmd then catches the buffer and sets ft + keymaps.
   event = { "BufReadPre *.tidal", "BufNewFile *.tidal" },
-  -- .scd (SuperCollider) buffers also get tidal.nvim keymaps via its Filetype
-  -- autocmd, so load for that filetype too.
-  ft = { "supercollider" },
+  -- NOTE: we intentionally do NOT load tidal.nvim for `supercollider` buffers.
+  -- SuperCollider editing is handled by scnvim (lua/plugins/scnvim.lua); letting
+  -- both grab .scd files would double up keymaps/interpreters.
   cmd = { "TidalLaunch", "TidalQuit" },
   -- Launch/quit the GHCi session. These are global (lazy loads the plugin on
   -- first use); the send/silence maps below are buffer-local in .tidal/.scd.

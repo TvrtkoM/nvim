@@ -63,6 +63,45 @@ Verify with `:Lazy` (plugins), `:Mason` (tools), and `:checkhealth`.
 - The two files under `queries/tsx/` are intentional overrides that fix `.tsx`
   highlighting/indentation gaps in the Treesitter fork — don't delete them.
 
+## Live-coding music (TidalCycles & SuperCollider)
+
+Optional setup for algorithmic music. The Neovim plugins ([tidal.nvim],
+[scnvim]) are already in this config — they reuse the Treesitter fork's `haskell`
+and `supercollider` parsers, so no extra editor setup is needed. You only need
+the **external** sound toolchain:
+
+| Tool | Why | Install (Ubuntu/Debian) |
+|------|-----|-------------------------|
+| **SuperCollider** | the sound engine (`sclang`/`scsynth`) | `sudo apt install supercollider` |
+| **SuperDirt** | Tidal's sampler/synths (a SC Quark) | in `sclang`: `Quarks.install("SuperDirt")` |
+| **GHC + cabal** | runs the Tidal Haskell library | [ghcup](https://www.haskell.org/ghcup/) |
+| **TidalCycles** | the pattern language | `cabal update && cabal install tidal --lib` |
+
+### TidalCycles
+
+1. Open a `.tidal` file (it becomes filetype `haskell`).
+2. `:TidalLaunch` (or `<leader>tL`) boots GHCi with Tidal. For sound, SuperDirt
+   must be running in SuperCollider first (boot it with `SuperDirt.start` in
+   `sclang`, or enable `sclang` in tidal.nvim's `boot` opts).
+3. Send code: `<leader>tl` line · `<leader>ts` selection (visual) · `<leader>tb`
+   block · `<leader>tn` Treesitter node · `<leader>td` silence `dN`
+   (prefix the channel number, e.g. `2<leader>td`) · `<leader>th` hush all.
+   `:TidalQuit` / `<leader>tq` stops it.
+
+### SuperCollider (scnvim)
+
+1. Open a `.scd`/`.sc` file (filetype `supercollider`).
+2. `<leader>sL` starts `sclang`. **First time only:** run `:SCNvimGenerateAssets`
+   to build syntax/snippets from the class library.
+3. Send code: `<leader>sl` line · `<leader>ss` selection (visual) · `<leader>sb`
+   block · `<leader>sh` stop all sound · `<leader>sr` recompile ·
+   `<leader>sp`/`<leader>sP` toggle/clear the post window · `<leader>si` signature.
+
+All keymaps are buffer-local and grouped under `<leader>t` / `<leader>s` in which-key.
+
+[tidal.nvim]: https://github.com/grddavies/tidal.nvim
+[scnvim]: https://github.com/davidgranstrom/scnvim
+
 ## Layout
 
 ```
