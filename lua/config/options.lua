@@ -80,3 +80,28 @@ vim.opt.maxmempattern = 20000 -- increase max memory
 -- here on purpose so Esc still passes through to programs that use it (Claude
 -- uses Esc to interrupt). Press i/a to start typing again.
 vim.keymap.set("t", "<C-q>", [[<C-\><C-n>]], { desc = "Terminal: enter Normal mode" })
+
+-- Auto-reload files changed outside Neovim (e.g. by the Claude agent editing a
+-- file). `autoread` (set above) only re-reads on a `:checktime`, which normally
+-- fires only on focus/shell events — so we trigger it ourselves on these events.
+-- CursorHold picks up changes while you sit in a buffer (after `updatetime`);
+-- TermLeave catches edits made by the Claude terminal split.
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI", "TermLeave" }, {
+  group = vim.api.nvim_create_augroup("auto_reload_changed_files", { clear = true }),
+  pattern = "*",
+  callback = function()
+    -- Don't run in command-line window or non-file buffers (avoids errors).
+    if vim.fn.mode() ~= "c" and vim.bo.buftype == "" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+-- When a reload happens, let you know rather than silently swapping content.
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  group = "auto_reload_changed_files",
+  pattern = "*",
+  callback = function()
+    vim.notify("File changed on disk — buffer reloaded", vim.log.levels.INFO)
+  end,
+})
