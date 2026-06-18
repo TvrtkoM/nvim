@@ -62,6 +62,13 @@ Verify with `:Lazy` (plugins), `:Mason` (tools), and `:checkhealth`.
   It shows warnings only — no auto-fix. Prettier handles formatting.
 - The two files under `queries/tsx/` are intentional overrides that fix `.tsx`
   highlighting/indentation gaps in the Treesitter fork — don't delete them.
+- **Haskell** IDE support ([haskell-tools.nvim]) is included but needs
+  **haskell-language-server** on your PATH — install via [GHCup]
+  (`ghcup install hls`), which keeps HLS matched to your project's GHC (more
+  reliable than Mason). Formatting uses **fourmolu** through conform (HLS's own
+  formatter is disabled). `.tidal` files share `filetype=haskell` but are *not*
+  Haskell projects, so HLS is auto-detached from them and fourmolu never runs on
+  them.
 
 ## Live-coding music (TidalCycles & SuperCollider)
 
@@ -101,6 +108,8 @@ All keymaps are buffer-local and grouped under `<leader>t` / `<leader>s` in whic
 
 [tidal.nvim]: https://github.com/grddavies/tidal.nvim
 [scnvim]: https://github.com/davidgranstrom/scnvim
+[haskell-tools.nvim]: https://github.com/mrcjkb/haskell-tools.nvim
+[GHCup]: https://www.haskell.org/ghcup/
 
 ## Layout
 

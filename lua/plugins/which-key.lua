@@ -12,6 +12,7 @@ return {
       { "<leader>c", group = "code" }, -- code action / format
       { "<leader>g", group = "git" }, -- gitsigns hunk actions
       { "<leader>a", group = "ai" }, -- Claude Code
+      { "<leader>u", group = "ui" }, -- toggles (diagnostics display, …)
       { "<leader>t", group = "tidal" }, -- TidalCycles send/silence
       -- SuperCollider (scnvim). scnvim's map() carries no `desc`, so we label
       -- the keys here; they only exist (buffer-local) in .scd/.sc buffers.

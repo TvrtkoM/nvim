@@ -10,7 +10,7 @@ return {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     dependencies = { "mason-org/mason.nvim" },
     opts = {
-      ensure_installed = { "prettierd" },
+      ensure_installed = { "prettierd", "fourmolu" },
     },
   },
 
@@ -46,12 +46,20 @@ return {
         html = { "prettierd" },
         markdown = { "prettierd" },
         yaml = { "prettierd" },
+        -- Real Haskell files. NOTE: `.tidal` files are also filetype=haskell but
+        -- are TidalCycles code, not Haskell projects — format_on_save below skips
+        -- them so fourmolu never rewrites your patterns.
+        haskell = { "fourmolu" },
       },
 
       -- Format on save. Returns nil (skip) when a toggle flag is set, so you
       -- can disable it globally or per-buffer (see the commands below).
       format_on_save = function(bufnr)
         if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+          return
+        end
+        -- Never run fourmolu on TidalCycles buffers (filetype=haskell but .tidal).
+        if vim.api.nvim_buf_get_name(bufnr):match("%.tidal$") then
           return
         end
         -- lsp_format = "fallback": if no prettierd for this ft, let the LSP

@@ -28,14 +28,30 @@ return {
       capabilities = require("blink.cmp").get_lsp_capabilities(),
     })
 
-    -- 1. Diagnostics display. Neovim 0.11 ships inline virtual text OFF by
-    --    default; turn it on plus signs in the gutter.
+    -- 1. Diagnostics display. We use `virtual_lines` instead of `virtual_text`:
+    --    inline virtual text flattens multi-line messages (e.g. HLS type errors)
+    --    into one giant line running off-screen. virtual_lines renders the full
+    --    message BELOW the code, properly wrapped. `current_line = true` shows it
+    --    only for the line the cursor is on, so the rest of the file stays clean.
     vim.diagnostic.config({
-      virtual_text = true, -- show the message inline at end of line
-      signs = true, -- show E/W markers in the sign column
+      virtual_text = false,
+      virtual_lines = { current_line = true },
+      signs = true, -- E/W markers in the sign column mark the other lines
       underline = true,
       severity_sort = true,
+      float = { border = "rounded", source = true }, -- nicer <leader>d / hover float
     })
+
+    -- Toggle between the two styles on the fly (e.g. if you want all messages
+    -- shown at once, or prefer terse inline text for TS).
+    vim.keymap.set("n", "<leader>uv", function()
+      local cfg = vim.diagnostic.config()
+      if cfg.virtual_lines then
+        vim.diagnostic.config({ virtual_lines = false, virtual_text = true })
+      else
+        vim.diagnostic.config({ virtual_lines = { current_line = true }, virtual_text = false })
+      end
+    end, { desc = "Toggle diagnostic virtual lines/text" })
 
     -- 2. Buffer-local keymaps, set only once a server attaches to a buffer.
     --    (Neovim 0.11 has some built-in LSP defaults like K=hover, grn=rename,
