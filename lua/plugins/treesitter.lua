@@ -68,8 +68,15 @@ return {
         -- 1. Highlighting (resolves the right parser for this buffer's filetype).
         vim.treesitter.start()
 
-        -- 2. Indentation driven by the syntax tree (great for JSX/TSX).
-        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        -- 2. Indentation driven by the syntax tree (great for JSX/TSX). Only wire
+        --    this up for languages that actually ship an `indents` query. Haskell
+        --    does NOT (its layout rule is too contextual for a tree-sitter indent
+        --    query), so for .hs/.tidal we leave indentexpr to our own ftplugin
+        --    (after/ftplugin/haskell.lua) instead of clobbering it with a no-op.
+        local lang = vim.treesitter.language.get_lang(vim.bo.filetype) or vim.bo.filetype
+        if vim.treesitter.query.get(lang, "indents") then
+          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
 
         -- NOTE: folding via Treesitter is already configured globally in
         -- lua/config/options.lua (foldmethod=expr, foldexpr=treesitter). With
