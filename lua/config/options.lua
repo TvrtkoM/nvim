@@ -1,5 +1,5 @@
 vim.opt.termguicolors = true
--- Colorscheme is now set by the tokyonight plugin (lua/plugins/colorscheme.lua).
+-- Colorscheme is set by the gruvbox plugin (lua/plugins/colorscheme.lua).
 
 vim.opt.number = true
 vim.opt.relativenumber = true

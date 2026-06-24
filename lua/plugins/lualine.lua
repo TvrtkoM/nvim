@@ -8,7 +8,7 @@ return {
   event = "VeryLazy", -- statusline isn't needed during early startup
   opts = {
     options = {
-      theme = "auto", -- match the active colorscheme (tokyonight)
+      theme = "auto", -- match the active colorscheme (gruvbox)
       globalstatus = true, -- one statusline for the whole UI (sets laststatus=3)
     },
     -- Sections left at lualine's defaults: they already show mode | branch,

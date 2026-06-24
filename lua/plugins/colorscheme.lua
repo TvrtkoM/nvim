@@ -2,11 +2,12 @@
 -- the first element is the GitHub "owner/repo" of the plugin. lazy.nvim reads
 -- this table to know what to install and how/when to load it.
 --
--- Theme: everforest (sainnhe/everforest) — a low-saturation, natural green
--- forest palette. It's a Vimscript colorscheme, so it's configured through
--- `vim.g.*` globals that MUST be set BEFORE `:colorscheme everforest` runs.
+-- Theme: gruvbox — a warm, earthy palette on a dark brown background (#282828),
+-- with high-contrast foreground. The maintained Lua port (ellisonleao/gruvbox.nvim)
+-- exposes `contrast` and per-group `overrides`, which we use to make window/panel
+-- borders clearly visible.
 return {
-  "sainnhe/everforest",
+  "ellisonleao/gruvbox.nvim",
 
   -- A colorscheme is part of the UI, so we want it available immediately at
   -- startup rather than lazy-loaded:
@@ -14,26 +15,31 @@ return {
   priority = 1000, -- load before all other plugins so nothing renders unthemed
 
   config = function()
-    -- everforest ships a light + dark variant; pin dark.
+    -- gruvbox has a light and dark variant; pin dark (the brown base).
     vim.o.background = "dark"
 
-    -- 'hard' | 'medium' | 'soft' — darkest background + most contrast.
-    vim.g.everforest_background = "hard"
-    -- 'low' | 'high' — 'high' makes greyed UI elements (separators, line nums,
-    -- sign column) brighter, so panel boundaries read clearly.
-    vim.g.everforest_ui_contrast = "high"
-    -- Recommended by the author: caches highlight groups for faster startup.
-    vim.g.everforest_better_performance = 1
-    -- Lift floating windows (hover/diagnostic/which-key) off the main bg.
-    vim.g.everforest_float_style = "dim"
-    vim.g.everforest_enable_italic = 1
+    require("gruvbox").setup({
+      -- "hard"  -> darkest bg (#1d2021), most contrast, least brown
+      -- ""      -> medium bg (#282828), the classic warm dark brown  <- chosen
+      -- "soft"  -> lighter bg (#32302f), warmest, least contrast
+      contrast = "",
 
-    vim.cmd.colorscheme("everforest")
+      -- Make panel boundaries obvious. WinSeparator is the line BETWEEN splits;
+      -- by default gruvbox draws it in a dim gray that blends in. We brighten it
+      -- to gruvbox's light-gray foreground so split/panel edges read clearly.
+      overrides = {
+        WinSeparator = { fg = "#a89984", bg = "#282828" },
+        -- Floating windows (hover/diagnostic/which-key): give them a slightly
+        -- lifted background + a warm border so they stand off the main editor.
+        NormalFloat = { bg = "#32302f" },
+        FloatBorder = { fg = "#d79921", bg = "#32302f" },
+      },
+    })
 
-    -- Belt-and-suspenders for the panel-boundary complaint: brighten the line
-    -- BETWEEN splits to everforest's light foreground so it can't blend in.
-    -- (Runs after :colorscheme so it overrides the theme's default.)
-    vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#9da9a0" })
-    vim.opt.fillchars:append({ vert = "│" }) -- clean solid glyph for that line
+    vim.cmd.colorscheme("gruvbox")
+
+    -- Use a solid vertical bar for split separators (the highlight above is what
+    -- makes it visible; this picks a clean glyph for it).
+    vim.opt.fillchars:append({ vert = "│" })
   end,
 }
