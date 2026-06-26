@@ -9,7 +9,7 @@ return {
   opts = {
     options = {
       theme = "auto", -- match the active colorscheme (gruvbox)
-      globalstatus = true, -- one statusline for the whole UI (sets laststatus=3)
+      globalstatus = false, -- one statusline PER window/split (sets laststatus=2)
     },
     -- Sections left at lualine's defaults: they already show mode | branch,
     -- diff, diagnostics | filename | filetype | progress | location.
