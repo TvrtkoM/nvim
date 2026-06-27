@@ -17,7 +17,7 @@ return {
   version = "*", -- latest stable tag
   -- Lazy-load the moment one of the surround keys is pressed (n + visual).
   keys = {
-    { "sa", mode = { "n", "x" }, desc = "Surround add" },
+    { "sa", mode = { "n", "x" },        desc = "Surround add" },
     { "sd", desc = "Surround delete" },
     { "sr", desc = "Surround replace" },
     { "sf", desc = "Surround find next" },

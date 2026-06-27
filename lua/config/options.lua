@@ -49,41 +49,35 @@ vim.opt.writebackup = false
 vim.opt.swapfile = false
 vim.opt.updatetime = 300 -- faster completion
 vim.opt.timeoutlen = 500 -- timeout duration
-vim.opt.ttimeoutlen = 0 -- key code timeout
-vim.opt.autoread = true -- auto-reload changes if outside of neovim
+vim.opt.ttimeoutlen = 0  -- key code timeout
+vim.opt.autoread = true  -- auto-reload changes if outside of neovim
 -- vim.opt.autowrite = false -- do not auto-save
 
-vim.opt.hidden = true -- allow hidden buffer
+vim.opt.hidden = true                  -- allow hidden buffer
 vim.opt.errorbells = false
 vim.opt.backspace = "indent,eol,start" -- better autosave behavior
-vim.opt.autochdir = false -- don't autochange directories
+vim.opt.autochdir = false              -- don't autochange directories
 -- vim.opt.iskeyword:append("-") -- include - in words
 -- vim.opt.path:append("**") -- include subdirs in search
 -- vim.opt.selection = "inclusive" -- include last char in selection
 -- vim.opt.mouse = "a" -- enable mouse support
 vim.opt.clipboard:append("unnamedplus") -- use system clipboard
-vim.opt.modifiable = true -- allow buffer modifications
+vim.opt.modifiable = true               -- allow buffer modifications
 vim.opt.encoding = "UTF-8"
 
 -- Folding: requires treesitter; safe fallback if not
-vim.opt.foldmethod = "expr" -- use expression for folding
+vim.opt.foldmethod = "expr"                          -- use expression for folding
 vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- use treesitter for folding
-vim.opt.foldlevel = 99 -- start with all folds open
+vim.opt.foldlevel = 99                               -- start with all folds open
 
-vim.opt.splitbelow = true -- horizontal splits open below
-vim.opt.splitright = true -- vertical splits open to the right
+vim.opt.splitbelow = true                            -- horizontal splits open below
+vim.opt.splitright = true                            -- vertical splits open to the right
 
-vim.opt.wildmenu = true -- tab completion
-vim.opt.wildmode = "longest:full,full" -- complete longest common match, full completion list, cycle through with Tab
-vim.opt.diffopt:append("linematch:60") -- improve diff display
-vim.opt.redrawtime = 10000 -- increase neovim redraw tolerance
-vim.opt.maxmempattern = 20000 -- increase max memory
-
--- In any terminal buffer (Claude split included), <C-q> leaves insert/terminal
--- mode and enters Terminal-Normal mode for scrolling/yanking. We avoid <Esc>
--- here on purpose so Esc still passes through to programs that use it (Claude
--- uses Esc to interrupt). Press i/a to start typing again.
-vim.keymap.set("t", "<C-q>", [[<C-\><C-n>]], { desc = "Terminal: enter Normal mode" })
+vim.opt.wildmenu = true                              -- tab completion
+vim.opt.wildmode = "longest:full,full"               -- complete longest common match, full completion list, cycle through with Tab
+vim.opt.diffopt:append("linematch:60")               -- improve diff display
+vim.opt.redrawtime = 10000                           -- increase neovim redraw tolerance
+vim.opt.maxmempattern = 20000                        -- increase max memory
 
 -- Auto-reload files changed outside Neovim (e.g. by the Claude agent editing a
 -- file). `autoread` (set above) only re-reads on a `:checktime`, which normally
