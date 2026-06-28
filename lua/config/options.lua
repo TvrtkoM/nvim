@@ -73,11 +73,11 @@ vim.opt.foldlevel = 99                               -- start with all folds ope
 vim.opt.splitbelow = true                            -- horizontal splits open below
 vim.opt.splitright = true                            -- vertical splits open to the right
 
-vim.opt.wildmenu = true                              -- tab completion
-vim.opt.wildmode = "longest:full,full"               -- complete longest common match, full completion list, cycle through with Tab
-vim.opt.diffopt:append("linematch:60")               -- improve diff display
-vim.opt.redrawtime = 10000                           -- increase neovim redraw tolerance
-vim.opt.maxmempattern = 20000                        -- increase max memory
+-- vim.opt.wildmenu = true                              -- tab completion
+-- vim.opt.wildmode = "longest:full,full"                                  -- complete longest common match, full completion list, cycle through with Tab
+vim.opt.diffopt:append("linematch:60") -- improve diff display
+vim.opt.redrawtime = 10000             -- increase neovim redraw tolerance
+vim.opt.maxmempattern = 20000          -- increase max memory
 
 -- Auto-reload files changed outside Neovim (e.g. by the Claude agent editing a
 -- file). `autoread` (set above) only re-reads on a `:checktime`, which normally
@@ -103,3 +103,5 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
     vim.notify("File changed on disk — buffer reloaded", vim.log.levels.INFO)
   end,
 })
+
+vim.o.equalalways = false
