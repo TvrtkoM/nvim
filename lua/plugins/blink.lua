@@ -7,9 +7,10 @@ return {
   "saghen/blink.cmp",
   -- A release tag makes lazy.nvim download the matching prebuilt binary.
   version = "1.*",
-  -- A big community snippet collection (React/TS/etc.), exposed via the
-  -- "snippets" source below.
-  dependencies = { "rafamadriz/friendly-snippets" },
+  -- LuaSnip is our snippet engine (see lua/plugins/luasnip.lua). Listed as a
+  -- dependency so it loads first; blink expands/jumps snippets through it and
+  -- sources snippet items from it (LuaSnip carries friendly-snippets along).
+  dependencies = { "L3MON4D3/LuaSnip" },
 
   opts = {
     -- Keymap preset. "default" is blink's own scheme:
@@ -18,7 +19,15 @@ return {
     --   <Tab>/<S-Tab> jump between snippet placeholders
     -- Prefer accepting with Enter or Tab instead? Swap to "enter" or
     -- "super-tab" here.
-    keymap = { preset = "default" },
+    keymap = {
+      preset = "default",
+      -- Snippets are NOT in the auto-completion list below, so they don't
+      -- clutter the menu while typing. Press <C-s> to open a menu containing
+      -- ONLY snippets, filtered by the text you've already typed.
+      ["<C-s>"] = {
+        function(cmp) cmp.show({ providers = { "snippets" } }) end,
+      },
+    },
 
     -- Icons in the menu need a Nerd Font in your terminal. If you see boxes
     -- instead of icons, install one (or this is harmless to ignore).
@@ -27,12 +36,27 @@ return {
     completion = {
       -- Auto-show the documentation/details popup next to the selected item.
       documentation = { auto_show = true },
+      list = {
+        selection = {
+          -- Keep the first item highlighted...
+          preselect = true,
+          -- ...but DON'T live-insert it on every keystroke. blink's default
+          -- auto_insert writes the previewed completion into the buffer as you
+          -- type, which collides with LuaSnip's placeholder region and throws
+          -- the cursor back (typing "Cl" yielded "lC"). With this off, text is
+          -- inserted only when you explicitly accept (<C-y>).
+          auto_insert = false,
+        },
+      },
     },
 
     -- Where completions come from, in priority order. "lazydev" feeds Neovim
     -- API / plugin-module completions in Lua files (no-op elsewhere).
     sources = {
-      default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+      -- No "snippets" here on purpose: while typing you only get LSP / path /
+      -- buffer (and lazydev in Lua). Snippets are summoned on demand with <C-s>
+      -- (see the keymap above). They still expand via LuaSnip.
+      default = { "lazydev", "lsp", "path", "buffer" },
       providers = {
         lazydev = {
           name = "LazyDev",
@@ -47,6 +71,11 @@ return {
 
     -- Use the fast Rust matcher; warn (don't error) if the binary is missing.
     fuzzy = { implementation = "prefer_rust_with_warning" },
+
+    -- Expand/jump snippets via LuaSnip instead of the built-in vim.snippet.
+    -- This also makes blink's "snippets" source pull items from LuaSnip (which
+    -- has friendly-snippets loaded), filetype-scoped.
+    snippets = { preset = "luasnip" },
   },
 
   -- Lets other plugin files append to sources.default instead of overwriting it.

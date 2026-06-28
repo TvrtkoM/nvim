@@ -51,8 +51,12 @@ function _G.HaskellIndent()
 end
 
 vim.bo.indentexpr = "v:lua.HaskellIndent()"
--- Recompute on these keys. The defaults (o, O, and newlines in insert) are what
--- drive auto-indent as you type; the bracket/`=` entries let re-indent (==) and
--- typing closers nudge things into place too.
-vim.bo.indentkeys = "0{,0},0),0],!^F,o,O,e,=where,=in,=then,=else"
+-- Only auto-indent NEW lines (o/O = open line, !^F = explicit re-indent, and the
+-- 0-prefixed bracket entries = a closer typed at column start). We deliberately
+-- do NOT include keyword triggers (=where/=in/=then/=else) or a bare `e`: those
+-- re-indent the line you're ALREADY on the instant you finish typing the word,
+-- and HaskellIndent (which just copies the previous line's indent) gets that
+-- wrong — e.g. typing space after `where` on a top-level line would pull it in
+-- to the previous nested line's indent.
+vim.bo.indentkeys = "0{,0},0),0],!^F,o,O"
 vim.bo.autoindent = true

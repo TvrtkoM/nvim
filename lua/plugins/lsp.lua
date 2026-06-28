@@ -39,6 +39,7 @@ return {
       signs = true, -- E/W markers in the sign column mark the other lines
       underline = true,
       severity_sort = true,
+      update_in_insert = true,
       float = { border = "rounded", source = true }, -- nicer <leader>d / hover float
     })
 
@@ -68,6 +69,7 @@ return {
         map("K", vim.lsp.buf.hover, "Hover docs")
         map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
         map("<leader>ca", vim.lsp.buf.code_action, "Code action")
+        map("<leader>cl", vim.lsp.codelens.run, "Run code lens")
         map("<leader>d", vim.diagnostic.open_float, "Line diagnostics")
         map("[d", function() vim.diagnostic.jump({ count = -1 }) end, "Prev diagnostic")
         map("]d", function() vim.diagnostic.jump({ count = 1 }) end, "Next diagnostic")
