@@ -13,19 +13,10 @@ return {
       { "<leader>g", group = "git" }, -- gitsigns hunk actions
       { "<leader>a", group = "ai" }, -- Claude Code
       { "<leader>u", group = "ui" }, -- toggles (diagnostics display, …)
-      { "<leader>t", group = "tidal" }, -- TidalCycles send/silence
-      -- SuperCollider (scnvim). scnvim's map() carries no `desc`, so we label
-      -- the keys here; they only exist (buffer-local) in .scd/.sc buffers.
-      { "<leader>s", group = "supercollider" },
-      { "<leader>sl", desc = "Send line" },
-      { "<leader>ss", desc = "Send selection", mode = "x" },
-      { "<leader>sb", desc = "Send block" },
-      { "<leader>sL", desc = "Launch sclang" },
-      { "<leader>sr", desc = "Recompile class library" },
-      { "<leader>sh", desc = "Stop sound (hard stop)" },
-      { "<leader>sp", desc = "Toggle post window" },
-      { "<leader>sP", desc = "Clear post window" },
-      { "<leader>si", desc = "Show signature" },
+      -- TidalCycles (<leader>t*), SuperCollider (<leader>s*) and Haskell repl
+      -- (<leader>r*) labels are registered buffer-local in
+      -- after/ftplugin/{haskell,supercollider}.lua instead of here, so they only
+      -- appear in their own buffers (.tidal files are filetype=haskell).
     },
   },
   keys = {

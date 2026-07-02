@@ -71,6 +71,27 @@ rmap("x", "<leader>rp", function() vim.cmd("normal! y") ht.repl.paste() end, "Se
 local ok, wk = pcall(require, "which-key")
 if ok then
   wk.add({ { "<leader>r", group = "repl", buffer = 0 } })
+
+  -- TidalCycles which-key labels. .tidal files are filetype=haskell (tidal.nvim
+  -- switches them), so there is NO `tidal` ftplugin — this haskell ftplugin is
+  -- where per-buffer tidal setup belongs, guarded to .tidal files. tidal.nvim
+  -- sets its send/silence maps buffer-local but with no `desc`; we label them
+  -- here (buffer-local) so they show only in .tidal buffers, not every haskell
+  -- buffer. tL/tq are global maps (see tidal.lua) but re-grouped here for a tidy
+  -- "+tidal" menu inside tidal buffers.
+  if vim.api.nvim_buf_get_name(0):match("%.tidal$") then
+    wk.add({
+      { "<leader>t", group = "tidal", buffer = 0 },
+      { "<leader>tl", desc = "Send line", buffer = 0 },
+      { "<leader>ts", desc = "Send selection", mode = "x", buffer = 0 },
+      { "<leader>tb", desc = "Send block", mode = { "n", "x" }, buffer = 0 },
+      { "<leader>tn", desc = "Send node", buffer = 0 },
+      { "<leader>td", desc = "Silence dN", buffer = 0 },
+      { "<leader>th", desc = "Hush all", buffer = 0 },
+      { "<leader>tL", desc = "Launch", buffer = 0 },
+      { "<leader>tq", desc = "Quit", buffer = 0 },
+    })
+  end
 end
 
 vim.bo.indentexpr = "v:lua.HaskellIndent()"
