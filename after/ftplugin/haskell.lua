@@ -50,6 +50,29 @@ function _G.HaskellIndent()
   return indent -- maintain the previous line's indent (autoindent behaviour)
 end
 
+-- GHCi REPL keymaps (haskell-tools.nvim). These are buffer-local (only in
+-- Haskell buffers) and their which-key labels are registered buffer-local too
+-- (buffer = 0), so they don't leak into other filetypes' which-key menus.
+local ht = require("haskell-tools")
+local rmap = function(mode, lhs, rhs, desc)
+  vim.keymap.set(mode, lhs, rhs, { buffer = true, desc = desc })
+end
+rmap("n", "<leader>rr", ht.repl.toggle, "Toggle repl")
+rmap("n", "<leader>rf", function() ht.repl.toggle(vim.api.nvim_buf_get_name(0)) end, "Repl (load this file)")
+rmap("n", "<leader>re", ht.repl.reload, "Reload repl (:r)")
+rmap("n", "<leader>rq", ht.repl.quit, "Quit repl")
+rmap("n", "<leader>rt", ht.repl.cword_type, "Type of word (:t)")
+rmap("n", "<leader>ri", ht.repl.cword_info, "Info on word (:i)")
+-- Send code to the repl: yank then paste into the GHCi session.
+rmap("n", "<leader>rp", function() vim.cmd("normal! yy") ht.repl.paste() end, "Send line to repl")
+rmap("x", "<leader>rp", function() vim.cmd("normal! y") ht.repl.paste() end, "Send selection to repl")
+
+-- which-key group label, buffer-local so "+repl" shows only in Haskell buffers.
+local ok, wk = pcall(require, "which-key")
+if ok then
+  wk.add({ { "<leader>r", group = "repl", buffer = 0 } })
+end
+
 vim.bo.indentexpr = "v:lua.HaskellIndent()"
 -- Only auto-indent NEW lines (o/O = open line, !^F = explicit re-indent, and the
 -- 0-prefixed bracket entries = a closer typed at column start). We deliberately
