@@ -45,6 +45,7 @@ local parsers = {
   "vimdoc",
   "markdown",
   "markdown_inline",
+  "latex",
   "bash",
   "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
   "supercollider", -- SuperDirt / SuperCollider .scd files
