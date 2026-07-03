@@ -28,31 +28,33 @@ return {
       capabilities = require("blink.cmp").get_lsp_capabilities(),
     })
 
-    -- 1. Diagnostics display. We use `virtual_lines` instead of `virtual_text`:
-    --    inline virtual text flattens multi-line messages (e.g. HLS type errors)
-    --    into one giant line running off-screen. virtual_lines renders the full
-    --    message BELOW the code, properly wrapped. `current_line = true` shows it
-    --    only for the line the cursor is on, so the rest of the file stays clean.
+    -- 1. Diagnostics display. Minimal, non-intrusive: no inline message text at
+    --    all (no virtual_text, no virtual_lines). The always-on indicators are
+    --    the sign-column marker (E/W — WHICH lines have problems) and an underline
+    --    under the exact offending span. Press <leader>d to open a float with the
+    --    full diagnostic message(s) for the current line on demand.
     vim.diagnostic.config({
       virtual_text = false,
-      virtual_lines = { current_line = true },
-      signs = true, -- E/W markers in the sign column mark the other lines
-      underline = true,
+      virtual_lines = false,
+      signs = true, -- E/W markers in the sign column: the global "here be errors" map
+      underline = true, -- squiggle under the exact offending token
       severity_sort = true,
       update_in_insert = true,
-      float = { border = "rounded", source = true }, -- nicer <leader>d / hover float
+      float = { border = "rounded", source = true }, -- the <leader>d / hover float
     })
 
-    -- Toggle between the two styles on the fly (e.g. if you want all messages
-    -- shown at once, or prefer terse inline text for TS).
+    -- Toggle virtual_lines on/off. Default view is clean (signs + underline only);
+    -- press this to reveal the full diagnostic message BELOW the current line
+    -- (wraps properly — good for HLS's long multi-line type errors), press again
+    -- to return to the clean default.
     vim.keymap.set("n", "<leader>uv", function()
       local cfg = vim.diagnostic.config()
       if cfg.virtual_lines then
-        vim.diagnostic.config({ virtual_lines = false, virtual_text = true })
+        vim.diagnostic.config({ virtual_lines = false })
       else
-        vim.diagnostic.config({ virtual_lines = { current_line = true }, virtual_text = false })
+        vim.diagnostic.config({ virtual_lines = { current_line = true } })
       end
-    end, { desc = "Toggle diagnostic virtual lines/text" })
+    end, { desc = "Toggle diagnostic virtual lines" })
 
     -- 2. Buffer-local keymaps, set only once a server attaches to a buffer.
     --    (Neovim 0.11 has some built-in LSP defaults like K=hover, grn=rename,
