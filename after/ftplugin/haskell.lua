@@ -68,7 +68,14 @@ rmap("n", "<leader>rp", function() vim.cmd("normal! yy") ht.repl.paste() end, "S
 rmap("x", "<leader>rp", function() vim.cmd("normal! y") ht.repl.paste() end, "Send selection to repl")
 
 -- Other haskell-tools features (not repl), under <leader>h.
-rmap("n", "<leader>hh", ht.hoogle.hoogle_signature, "Hoogle signature")
+rmap("n", "<leader>hh", ht.hoogle.hoogle_signature, "Hoogle signature (cword)")
+rmap("n", "<leader>hH", function()
+  vim.ui.input({ prompt = "Hoogle: " }, function(input)
+    if input and input ~= "" then
+      ht.hoogle.hoogle_signature({ search_term = input })
+    end
+  end)
+end, "Hoogle search (free)")
 rmap("n", "<leader>he", ht.lsp.buf_eval_all, "Eval all comments (-- >>>)")
 rmap("n", "<leader>hs", function() vim.cmd("Haskell hls restart") end, "Restart HLS")
 
