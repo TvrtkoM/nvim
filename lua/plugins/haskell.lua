@@ -1,6 +1,6 @@
 -- haskell-tools.nvim: batteries-included Haskell IDE layer. It configures and
 -- starts haskell-language-server (HLS) itself — do NOT add HLS to
--- mason-lspconfig; this plugin owns it. Standard LSP keymaps (gd/gr/K/<leader>rn
+-- mason-lspconfig; this plugin owns it. Standard LSP keymaps (gd/gr/K/<leader>cr
 -- etc.) come from the shared LspAttach autocmd in lua/plugins/lsp.lua, and blink
 -- completion capabilities are inherited from the `vim.lsp.config("*", …)` default
 -- set there. Configured via `vim.g.haskell_tools` (must be set before load).

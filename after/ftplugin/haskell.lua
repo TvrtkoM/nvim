@@ -92,9 +92,11 @@ if ok then
   -- where per-buffer tidal setup belongs, guarded to .tidal files. tidal.nvim
   -- sets its send/silence maps buffer-local but with no `desc`; we label them
   -- here (buffer-local) so they show only in .tidal buffers, not every haskell
-  -- buffer. tL/tq are global maps (see tidal.lua) but re-grouped here for a tidy
-  -- "+tidal" menu inside tidal buffers.
+  -- buffer. tL/tq are mapped here rather than in tidal.lua's `keys`, which would
+  -- make them global; the :Tidal* commands still lazy-load the plugin.
   if vim.api.nvim_buf_get_name(0):match("%.tidal$") then
+    rmap("n", "<leader>tL", "<cmd>TidalLaunch<cr>", "Launch")
+    rmap("n", "<leader>tq", "<cmd>TidalQuit<cr>", "Quit")
     wk.add({
       { "<leader>t", group = "tidal", buffer = 0 },
       { "<leader>tl", desc = "Send line", buffer = 0 },
@@ -103,8 +105,6 @@ if ok then
       { "<leader>tn", desc = "Send node", buffer = 0 },
       { "<leader>td", desc = "Silence dN", buffer = 0 },
       { "<leader>th", desc = "Hush all", buffer = 0 },
-      { "<leader>tL", desc = "Launch", buffer = 0 },
-      { "<leader>tq", desc = "Quit", buffer = 0 },
     })
   end
 end

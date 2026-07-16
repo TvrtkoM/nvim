@@ -10,6 +10,7 @@ return {
   -- so we avoid pulling in the whole snacks dependency.
   opts = {
     terminal = { provider = "native" },
+    diff_opts = { open_in_new_tab = true },
   },
   -- Lazy-load only when one of these commands or keys is used.
   cmd = {

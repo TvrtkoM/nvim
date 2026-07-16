@@ -20,6 +20,10 @@ return {
     -- Loaded before lua_ls is enabled below, so lua_ls attaches with lazydev's
     -- Neovim type library already in place (no transient undefined-global flash).
     "folke/lazydev.nvim",
+    -- Bundles the schemastore.org catalog so jsonls knows which schema applies to
+    -- tsconfig.json, package.json, etc. — this is what gives VSCode-style JSON
+    -- completion + validation. A library (no setup/spec of its own).
+    "b0o/SchemaStore.nvim",
   },
   config = function()
     -- Tell every language server that our client (via blink.cmp) supports rich
@@ -69,9 +73,9 @@ return {
         map("gi", vim.lsp.buf.implementation, "Goto implementation")
         map("gr", vim.lsp.buf.references, "References")
         map("K", vim.lsp.buf.hover, "Hover docs")
-        map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
         map("<leader>ca", vim.lsp.buf.code_action, "Code action")
         map("<leader>cl", vim.lsp.codelens.run, "Run code lens")
+        map("<leader>cr", vim.lsp.buf.rename, "Rename symbol")
         map("<leader>d", vim.diagnostic.open_float, "Line diagnostics")
         map("[d", function() vim.diagnostic.jump({ count = -1 }) end, "Prev diagnostic")
         map("]d", function() vim.diagnostic.jump({ count = 1 }) end, "Next diagnostic")
@@ -92,6 +96,18 @@ return {
       },
     })
 
+    -- jsonls: JSON completion/validation from schemas. Feed it the schemastore
+    -- catalog (matched to files by name) so tsconfig.json, package.json, etc. get
+    -- the same schema-driven autocomplete as VSCode. Attaches to json + jsonc.
+    vim.lsp.config("jsonls", {
+      settings = {
+        json = {
+          schemas = require("schemastore").json.schemas(),
+          validate = { enable = true },
+        },
+      },
+    })
+
     -- 4. Mason must be set up BEFORE mason-lspconfig.
     require("mason").setup()
     require("mason-lspconfig").setup({
@@ -100,7 +116,7 @@ return {
       -- vtsls = TS/JS, lua_ls = Lua, eslint = project ESLint diagnostics
       -- (warnings only; attaches only when the project has an ESLint config,
       -- and does NOT auto-fix unless its fixAll code action is wired to save).
-      ensure_installed = { "vtsls", "lua_ls", "eslint" },
+      ensure_installed = { "vtsls", "lua_ls", "eslint", "jsonls" },
       -- automatic_enable = true is the default: mason-lspconfig calls
       -- vim.lsp.enable() for each installed server, so we don't have to.
     })

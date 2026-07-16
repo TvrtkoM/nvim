@@ -22,13 +22,10 @@ return {
   -- NOTE: we intentionally do NOT load tidal.nvim for `supercollider` buffers.
   -- SuperCollider editing is handled by scnvim (lua/plugins/scnvim.lua); letting
   -- both grab .scd files would double up keymaps/interpreters.
+  -- Launch/quit the GHCi session. Deliberately NOT declared under lazy's `keys`:
+  -- that creates global loading stubs in every buffer, so <leader>t showed up in
+  -- which-key everywhere. They are mapped buffer-local in after/ftplugin/haskell.lua.
   cmd = { "TidalLaunch", "TidalQuit" },
-  -- Launch/quit the GHCi session. These are global (lazy loads the plugin on
-  -- first use); the send/silence maps below are buffer-local in .tidal/.scd.
-  keys = {
-    { "<leader>tL", "<cmd>TidalLaunch<cr>", desc = "Tidal: launch" },
-    { "<leader>tq", "<cmd>TidalQuit<cr>", desc = "Tidal: quit" },
-  },
   opts = {
     -- Remap every default send/silence keymap under <leader>t. (Defaults were
     -- <S-CR>/<M-CR>/<leader><CR>/<leader>d/<leader><Esc>.) These are set

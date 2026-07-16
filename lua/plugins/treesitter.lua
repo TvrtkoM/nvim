@@ -12,6 +12,7 @@ local filetypes = {
   "javascript",
   "javascriptreact", -- .jsx
   "json",
+  "jsonc", -- tsconfig.json etc.; uses the json parser, which tolerates comments
   "html",
   "css",
   "lua", -- so editing this config looks good too
