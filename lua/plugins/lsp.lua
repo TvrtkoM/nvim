@@ -40,7 +40,7 @@ return {
     vim.diagnostic.config({
       virtual_text = false,
       virtual_lines = false,
-      signs = true, -- E/W markers in the sign column: the global "here be errors" map
+      signs = true,     -- E/W markers in the sign column: the global "here be errors" map
       underline = true, -- squiggle under the exact offending token
       severity_sort = true,
       update_in_insert = true,
@@ -94,6 +94,10 @@ return {
           },
         },
       },
+    })
+
+    vim.lsp.config("eslint", {
+      settings = { workingDirectory = { mode = "location" } }
     })
 
     -- jsonls: JSON completion/validation from schemas. Feed it the schemastore
