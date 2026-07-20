@@ -20,6 +20,7 @@ local filetypes = {
   "markdown",
   "bash",
   "rust",
+  "nix",
   "haskell",       -- also covers TidalCycles: tidal.nvim sets .tidal files to filetype=haskell
   "supercollider", -- .scd SuperCollider files (SuperDirt sound engine)
 }
@@ -50,6 +51,7 @@ local parsers = {
   "latex",
   "bash",
   "rust",
+  "nix",
   "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
   "supercollider", -- SuperDirt / SuperCollider .scd files
 }

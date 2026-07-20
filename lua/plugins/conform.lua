@@ -10,7 +10,7 @@ return {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     dependencies = { "mason-org/mason.nvim" },
     opts = {
-      ensure_installed = { "prettierd", "fourmolu" },
+      ensure_installed = { "prettierd", "fourmolu", "nixfmt" },
     },
   },
 
@@ -53,6 +53,14 @@ return {
         -- rustfmt comes from rustup, not Mason (same toolchain-pinning reason as
         -- rust_analyzer). It picks up a project's rustfmt.toml automatically.
         rust = { "rustfmt" },
+        -- nixfmt = the RFC-166 style, what nixpkgs itself uses.
+        nix = { "nixfmt" },
+      },
+
+      -- conform's built-in nixfmt recipe invokes the binary bare, which nixfmt
+      -- now warns is deprecated for stdin; "-" is the supported spelling.
+      formatters = {
+        nixfmt = { args = { "-" } },
       },
 
       -- Format on save. Returns nil (skip) when a toggle flag is set, so you
