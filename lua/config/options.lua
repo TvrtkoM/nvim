@@ -17,10 +17,6 @@ vim.opt.smartcase = true
 vim.opt.ignorecase = true
 vim.opt.hlsearch = true
 vim.opt.incsearch = true
--- Press <Esc> to clear the leftover search highlight (in addition to its normal
--- job). The highlight stays while you n/N through matches; one tap clears it,
--- so you no longer need to type :nohlsearch manually.
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
 vim.opt.signcolumn = "yes"
 vim.opt.colorcolumn = "120"
 vim.opt.showmatch = true

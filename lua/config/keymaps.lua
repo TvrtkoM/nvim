@@ -4,6 +4,11 @@
 -- uses Esc to interrupt). Press i/a to start typing again.
 vim.keymap.set("t", "<C-q>", [[<C-\><C-n>]], { desc = "Terminal: enter Normal mode" })
 
+-- Press <Esc> to clear the leftover search highlight (in addition to its normal
+-- job). The highlight stays while you n/N through matches; one tap clears it,
+-- so you no longer need to type :nohlsearch manually.
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
+
 -- Yank a Claude-style file reference (@path#L12 or @path#L12-L34) for the current
 -- line or visual selection into the system clipboard, ready to paste into Claude.
 -- Path is relative to nvim's cwd (":." modifier) — the dir Claude runs in.
@@ -18,7 +23,7 @@ local function yank_claude_ref(visual)
     local a, b = vim.fn.line("v"), vim.fn.line(".")
     if a > b then a, b = b, a end
     ref = a == b and string.format("@%s#L%d", path, a)
-      or string.format("@%s#L%d-L%d", path, a, b)
+        or string.format("@%s#L%d-L%d", path, a, b)
   else
     ref = string.format("@%s#L%d", path, vim.fn.line("."))
   end
