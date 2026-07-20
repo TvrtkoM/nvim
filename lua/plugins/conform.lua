@@ -50,6 +50,9 @@ return {
         -- are TidalCycles code, not Haskell projects — format_on_save below skips
         -- them so fourmolu never rewrites your patterns.
         haskell = { "fourmolu" },
+        -- rustfmt comes from rustup, not Mason (same toolchain-pinning reason as
+        -- rust_analyzer). It picks up a project's rustfmt.toml automatically.
+        rust = { "rustfmt" },
       },
 
       -- Format on save. Returns nil (skip) when a toggle flag is set, so you

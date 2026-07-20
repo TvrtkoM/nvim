@@ -112,6 +112,28 @@ return {
       },
     })
 
+    -- rust_analyzer. Deliberately NOT installed via Mason: rust-analyzer is
+    -- version-locked to the compiler it reads metadata from, so we use the one
+    -- rustup ships alongside your toolchain (~/.cargo/bin) and keep them in sync
+    -- via `rustup update`. Because Mason didn't install it, mason-lspconfig won't
+    -- auto-enable it either — hence the explicit vim.lsp.enable() below.
+    vim.lsp.config("rust_analyzer", {
+      settings = {
+        ["rust-analyzer"] = {
+          -- Use clippy instead of plain `cargo check` for on-save diagnostics:
+          -- same type errors, plus clippy's lint suggestions.
+          checkOnSave = true,
+          check = { command = "clippy" },
+          cargo = { allFeatures = true },
+          inlayHints = {
+            parameterHints = { enable = true },
+            typeHints = { enable = true },
+          },
+        },
+      },
+    })
+    vim.lsp.enable("rust_analyzer")
+
     -- 4. Mason must be set up BEFORE mason-lspconfig.
     require("mason").setup()
     require("mason-lspconfig").setup({
