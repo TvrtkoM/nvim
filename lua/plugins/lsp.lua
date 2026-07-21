@@ -134,6 +134,25 @@ return {
     })
     vim.lsp.enable("rust_analyzer")
 
+    -- nixd: Nix LSP. Not from Mason (not in its registry, and it needs a working
+    -- `nix` to evaluate) — install it declaratively inside the NixOS VM. The
+    -- executable guard keeps this same config usable on the Ubuntu host, where
+    -- nixd is absent and enabling it would spawn a missing binary.
+    --
+    -- nixpkgs.expr gives package-name completion + hover on `pkgs.<...>`.
+    -- NixOS *option* completion would need an additional options.nixos.expr
+    -- pointing at this machine's evaluated config; deliberately left out.
+    if vim.fn.executable("nixd") == 1 then
+      vim.lsp.config("nixd", {
+        settings = {
+          nixd = {
+            nixpkgs = { expr = "import <nixpkgs> { }" },
+          },
+        },
+      })
+      vim.lsp.enable("nixd")
+    end
+
     -- 4. Mason must be set up BEFORE mason-lspconfig.
     require("mason").setup()
     require("mason-lspconfig").setup({
