@@ -2,18 +2,16 @@
 -- docs, go-to-definition, references, rename, and code actions for TypeScript.
 --
 -- The stack (modern Neovim 0.11+ way):
---   * mason.nvim          -> installs the server BINARIES (a package manager)
---   * mason-lspconfig     -> bridges Mason <-> lspconfig; auto-ensures + auto-enables
+--   * nix                 -> installs the server BINARIES (home.packages, or a
+--                            project's `nix develop` shell for per-project tools)
 --   * nvim-lspconfig      -> ships the per-server default configs (cmd, root dir, ...)
 --   * vim.lsp.config()    -> Neovim core API for per-server overrides
---   * vim.lsp.enable()    -> Neovim core API that actually starts a server (called
---                            for us automatically by mason-lspconfig)
+--   * vim.lsp.enable()    -> Neovim core API that actually starts a server; called
+--                            from the guarded loop at the bottom of this file
 
 return {
   "neovim/nvim-lspconfig",
   dependencies = {
-    "mason-org/mason.nvim",
-    "mason-org/mason-lspconfig.nvim",
     -- Listed here so blink is loaded before this config runs, making its
     -- completion capabilities available below.
     "saghen/blink.cmp",
@@ -112,11 +110,6 @@ return {
       },
     })
 
-    -- rust_analyzer. Deliberately NOT installed via Mason: rust-analyzer is
-    -- version-locked to the compiler it reads metadata from, so we use the one
-    -- rustup ships alongside your toolchain (~/.cargo/bin) and keep them in sync
-    -- via `rustup update`. Because Mason didn't install it, mason-lspconfig won't
-    -- auto-enable it either — hence the explicit vim.lsp.enable() below.
     vim.lsp.config("rust_analyzer", {
       settings = {
         ["rust-analyzer"] = {
@@ -132,38 +125,31 @@ return {
         },
       },
     })
-    vim.lsp.enable("rust_analyzer")
-
-    -- nixd: Nix LSP. Not from Mason (not in its registry, and it needs a working
-    -- `nix` to evaluate) — install it declaratively inside the NixOS VM. The
-    -- executable guard keeps this same config usable on the Ubuntu host, where
-    -- nixd is absent and enabling it would spawn a missing binary.
+    -- nixd: Nix LSP, installed declaratively via home.packages.
     --
     -- nixpkgs.expr gives package-name completion + hover on `pkgs.<...>`.
     -- NixOS *option* completion would need an additional options.nixos.expr
     -- pointing at this machine's evaluated config; deliberately left out.
-    if vim.fn.executable("nixd") == 1 then
-      vim.lsp.config("nixd", {
-        settings = {
-          nixd = {
-            nixpkgs = { expr = "import <nixpkgs> { }" },
-          },
+    vim.lsp.config("nixd", {
+      settings = {
+        nixd = {
+          nixpkgs = { expr = "import <nixpkgs> { }" },
         },
-      })
-      vim.lsp.enable("nixd")
-    end
-
-    -- 4. Mason must be set up BEFORE mason-lspconfig.
-    require("mason").setup()
-    require("mason-lspconfig").setup({
-      -- Auto-install these servers if missing. vtsls = TypeScript/JS,
-      -- lua_ls = Lua (so editing this config gets LSP too).
-      -- vtsls = TS/JS, lua_ls = Lua, eslint = project ESLint diagnostics
-      -- (warnings only; attaches only when the project has an ESLint config,
-      -- and does NOT auto-fix unless its fixAll code action is wired to save).
-      ensure_installed = { "vtsls", "lua_ls", "eslint", "jsonls" },
-      -- automatic_enable = true is the default: mason-lspconfig calls
-      -- vim.lsp.enable() for each installed server, so we don't have to.
+      },
     })
+
+    local servers = {
+      vtsls         = "vtsls",
+      lua_ls        = "lua-language-server",
+      eslint        = "vscode-eslint-language-server",
+      jsonls        = "vscode-json-language-server",
+      rust_analyzer = "rust-analyzer",
+      nixd          = "nixd",
+    }
+    for server, bin in pairs(servers) do
+      if vim.fn.executable(bin) == 1 then
+        vim.lsp.enable(server)
+      end
+    end
   end,
 }

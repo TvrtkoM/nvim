@@ -1,20 +1,12 @@
 -- Formatting via conform.nvim. It runs a real formatter (prettierd) per
 -- filetype, honoring your project's .prettierrc / prettier.config.js if present.
--- This file returns TWO plugin specs: conform itself, and a helper that makes
--- Mason auto-install the prettierd binary (Mason's own auto-install only covers
--- LSP servers, not formatters).
+--
+-- The formatter binaries come from Nix (home.packages, or a project's
+-- `nix develop` shell),
+-- or errors — check :ConformInfo, or ~/.local/state/nvim/conform.log.
 
 return {
-  -- 1. Auto-install non-LSP tools (formatters/linters) through Mason.
-  {
-    "WhoIsSethDaniel/mason-tool-installer.nvim",
-    dependencies = { "mason-org/mason.nvim" },
-    opts = {
-      ensure_installed = { "prettierd", "fourmolu" },
-    },
-  },
-
-  -- 2. The formatter runner.
+  -- The formatter runner.
   {
     "stevearc/conform.nvim",
     -- Load right before a write (for format-on-save) or when used manually.
@@ -50,8 +42,6 @@ return {
         -- are TidalCycles code, not Haskell projects — format_on_save below skips
         -- them so fourmolu never rewrites your patterns.
         haskell = { "fourmolu" },
-        -- rustfmt comes from rustup, not Mason (same toolchain-pinning reason as
-        -- rust_analyzer). It picks up a project's rustfmt.toml automatically.
         rust = { "rustfmt" },
         -- nixfmt = the RFC-166 style, what nixpkgs itself uses.
         nix = { "nixfmt" },
