@@ -146,10 +146,24 @@ return {
       rust_analyzer = "rust-analyzer",
       nixd          = "nixd",
     }
-    for server, bin in pairs(servers) do
-      if vim.fn.executable(bin) == 1 then
-        vim.lsp.enable(server)
+    -- Re-runnable: devshell servers (rust-analyzer) only land on PATH once
+    -- direnv exports, which is after startup. Idempotent via `enabled`.
+    local enabled = {}
+    local function enable_available_servers()
+      for server, bin in pairs(servers) do
+        if not enabled[server] and vim.fn.executable(bin) == 1 then
+          enabled[server] = true
+          vim.lsp.enable(server)
+        end
       end
     end
+
+    enable_available_servers()
+
+    -- direnv.vim fires this after applying the exported env, so PATH is updated.
+    vim.api.nvim_create_autocmd("User", {
+      pattern = "DirenvLoaded",
+      callback = enable_available_servers,
+    })
   end,
 }
