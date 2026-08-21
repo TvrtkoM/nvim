@@ -138,6 +138,27 @@ return {
       },
     })
 
+    -- basedpyright handles types; we turn OFF its formatting/linting-ish bits and
+    -- let ruff own those, so the two servers don't fight.
+    vim.lsp.config("basedpyright", {
+      settings = {
+        basedpyright = {
+          analysis = {
+            typeCheckingMode = "standard", -- "basic"/"standard"/"strict"
+            autoImportCompletions = true,
+          },
+        },
+      },
+    })
+
+    -- ruff as an LSP: live lint diagnostics + code actions (organize imports, fixes).
+    -- We defer hover to basedpyright to avoid duplicate hover popups.
+    vim.lsp.config("ruff", {
+      on_attach = function(client)
+        client.server_capabilities.hoverProvider = false
+      end,
+    })
+
     local servers = {
       vtsls         = "vtsls",
       lua_ls        = "lua-language-server",
@@ -145,6 +166,8 @@ return {
       jsonls        = "vscode-json-language-server",
       rust_analyzer = "rust-analyzer",
       nixd          = "nixd",
+      basedpyright  = "basedpyright",
+      ruff          = "ruff"
     }
     -- Re-runnable: devshell servers (rust-analyzer) only land on PATH once
     -- direnv exports, which is after startup. Idempotent via `enabled`.

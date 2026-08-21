@@ -45,6 +45,8 @@ return {
         rust = { "rustfmt" },
         -- nixfmt = the RFC-166 style, what nixpkgs itself uses.
         nix = { "nixfmt" },
+        -- python
+        python = { "ruff_organize_imports", "ruff_format" },
       },
 
       -- conform's built-in nixfmt recipe invokes the binary bare, which nixfmt

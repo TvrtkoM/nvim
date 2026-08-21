@@ -12,7 +12,7 @@ local filetypes = {
   "javascript",
   "javascriptreact", -- .jsx
   "json",
-  "jsonc", -- tsconfig.json etc.; uses the json parser, which tolerates comments
+  "jsonc",           -- tsconfig.json etc.; uses the json parser, which tolerates comments
   "html",
   "css",
   "lua", -- so editing this config looks good too
@@ -20,6 +20,7 @@ local filetypes = {
   "markdown",
   "bash",
   "rust",
+  "python",
   "nix",
   "haskell",       -- also covers TidalCycles: tidal.nvim sets .tidal files to filetype=haskell
   "supercollider", -- .scd SuperCollider files (SuperDirt sound engine)
@@ -51,6 +52,7 @@ local parsers = {
   "latex",
   "bash",
   "rust",
+  "python",
   "nix",
   "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
   "supercollider", -- SuperDirt / SuperCollider .scd files
