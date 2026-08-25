@@ -47,9 +47,6 @@ return {
         nix = { "nixfmt" },
         -- python
         python = { "ruff_organize_imports", "ruff_format" },
-        -- php-cs-fixer honors a project's .php-cs-fixer.php ruleset if present,
-        -- else falls back to its own defaults (PSR-12-ish).
-        php = { "php_cs_fixer" },
       },
 
       -- conform's built-in nixfmt recipe invokes the binary bare, which nixfmt
