@@ -159,6 +159,19 @@ return {
       end,
     })
 
+    -- intelephense: PHP LSP (completion, hover, goto, diagnostics). Proprietary /
+    -- freemium — the free tier runs unconfigured; a licence key (licenceKey below,
+    -- or the INTELEPHENSE_LICENCE_KEY env var) unlocks rename-across-files and the
+    -- richer code actions. Formatting is left to php-cs-fixer via conform.
+    vim.lsp.config("intelephense", {
+      settings = {
+        intelephense = {
+          -- Don't let intelephense format on top of php-cs-fixer.
+          format = { enable = false },
+        },
+      },
+    })
+
     local servers = {
       vtsls         = "vtsls",
       lua_ls        = "lua-language-server",
@@ -167,7 +180,8 @@ return {
       rust_analyzer = "rust-analyzer",
       nixd          = "nixd",
       basedpyright  = "basedpyright",
-      ruff          = "ruff"
+      ruff          = "ruff",
+      intelephense  = "intelephense",
     }
     -- Re-runnable: devshell servers (rust-analyzer) only land on PATH once
     -- direnv exports, which is after startup. Idempotent via `enabled`.

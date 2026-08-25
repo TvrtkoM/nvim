@@ -22,6 +22,7 @@ local filetypes = {
   "rust",
   "python",
   "nix",
+  "php",
   "haskell",       -- also covers TidalCycles: tidal.nvim sets .tidal files to filetype=haskell
   "supercollider", -- .scd SuperCollider files (SuperDirt sound engine)
 }
@@ -54,6 +55,11 @@ local parsers = {
   "rust",
   "python",
   "nix",
+  "php",           -- outer grammar: HTML with <?php ?> islands
+  "php_only",       -- REQUIRED: the actual PHP code inside the tags is highlighted
+                    -- via an injection into this grammar; without it, everything
+                    -- between <?php and ?> stays uncolored
+  "phpdoc",        -- /** @param ... */ docblock highlighting inside PHP
   "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
   "supercollider", -- SuperDirt / SuperCollider .scd files
 }
