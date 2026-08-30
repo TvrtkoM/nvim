@@ -164,6 +164,7 @@ return {
       lua_ls        = "lua-language-server",
       eslint        = "vscode-eslint-language-server",
       jsonls        = "vscode-json-language-server",
+      cssls         = "vscode-css-language-server",
       rust_analyzer = "rust-analyzer",
       nixd          = "nixd",
       basedpyright  = "basedpyright",
