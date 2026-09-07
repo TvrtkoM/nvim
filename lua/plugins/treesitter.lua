@@ -20,6 +20,10 @@ local filetypes = {
   "markdown",
   "bash",
   "rust",
+  "php",
+  "php_only",
+  "phpdoc",
+  "blade",
   "python",
   "nix",
   "haskell",       -- also covers TidalCycles: tidal.nvim sets .tidal files to filetype=haskell
@@ -43,6 +47,9 @@ local parsers = {
   "jsdoc",
   "json",
   "html",
+  -- queries-only pack that `html` (and `blade`) inherit for tag/attribute
+  -- highlights; install() does NOT pull it in automatically, hence listed.
+  "html_tags",
   "css",
   "lua",
   "vim",
@@ -53,6 +60,11 @@ local parsers = {
   "bash",
   "rust",
   "python",
+  "php",           -- outer grammar: HTML with <?php ?> islands
+  "php_only",      -- REQUIRED: code inside the tags is highlighted via an
+                   -- injection into this grammar; without it, PHP looks flat
+  "phpdoc",        -- /** @param */ docblocks inside PHP
+  "blade",         -- Laravel Blade; embeds html, injects php_only for {{ }}
   "nix",
   "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
   "supercollider", -- SuperDirt / SuperCollider .scd files

@@ -101,3 +101,9 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
 })
 
 vim.o.equalalways = false
+
+-- Neovim has no built-in filetype for Laravel Blade. Map *.blade.php -> `blade`
+-- (must beat the generic *.php rule, so match on the full double extension).
+vim.filetype.add({
+  pattern = { [".*%.blade%.php"] = "blade" },
+})

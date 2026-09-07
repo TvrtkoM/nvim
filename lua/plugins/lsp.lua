@@ -159,6 +159,25 @@ return {
       end,
     })
 
+    vim.lsp.config("intelephense", {
+      -- Also attach in blade: intelephense still gives PHP intel inside the
+      -- file's real <?php ?> regions (not inside {{ }} — that's laravel_ls).
+      filetypes = { "php", "blade" },
+      settings = {
+        intelephense = {
+          format = { enable = false }
+        }
+      },
+      on_attach = function(client, bufnr)
+        -- In blade, intelephense flags @directives/{{ }} as PHP syntax errors.
+        -- Silence its diagnostics there; keep everything else.
+        if vim.bo[bufnr].filetype == "blade" then
+          local ns = vim.lsp.diagnostic.get_namespace(client.id)
+          vim.diagnostic.enable(false, { bufnr = bufnr, ns_id = ns })
+        end
+      end,
+    })
+
     local servers = {
       vtsls         = "vtsls",
       lua_ls        = "lua-language-server",
@@ -168,7 +187,11 @@ return {
       rust_analyzer = "rust-analyzer",
       nixd          = "nixd",
       basedpyright  = "basedpyright",
-      ruff          = "ruff"
+      ruff          = "ruff",
+      intelephense  = "intelephense",
+      -- Laravel-specific: completes config/view/route keys inside {{ }}. Only
+      -- attaches in a real Laravel project (root marker: `artisan`).
+      laravel_ls    = "laravel-ls",
     }
     -- Re-runnable: devshell servers (rust-analyzer) only land on PATH once
     -- direnv exports, which is after startup. Idempotent via `enabled`.
