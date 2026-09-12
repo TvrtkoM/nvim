@@ -48,7 +48,7 @@ return {
         -- python
         python = { "ruff_organize_imports", "ruff_format" },
         -- php
-        php = { "php_cs_fixer" }
+        php = { "pint", "php_cs_fixer", stop_after_first = true }
       },
 
       -- conform's built-in nixfmt recipe invokes the binary bare, which nixfmt
