@@ -13,6 +13,8 @@ return {
     view_options = { show_hidden = true },
     -- Let oil be the default handler when you open a directory.
     default_file_explorer = true,
+    -- Room for oil-git-status's two status columns (index + working tree).
+    win_options = { signcolumn = "yes:2" },
   },
 
   keys = {
