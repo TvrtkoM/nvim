@@ -110,6 +110,16 @@ return {
       },
     })
 
+    -- cssls flags Tailwind's @tailwind/@apply/@screen as unknown at-rules;
+    -- silence that (tailwindcss LSP handles those) while keeping other CSS lint.
+    vim.lsp.config("cssls", {
+      settings = {
+        css = { lint = { unknownAtRules = "ignore" } },
+        scss = { lint = { unknownAtRules = "ignore" } },
+        less = { lint = { unknownAtRules = "ignore" } },
+      },
+    })
+
     vim.lsp.config("rust_analyzer", {
       settings = {
         ["rust-analyzer"] = {
@@ -188,6 +198,8 @@ return {
       nixd          = "nixd",
       basedpyright  = "basedpyright",
       ruff          = "ruff",
+      tailwindcss   = "tailwindcss-language-server",
+      emmet_language_server = "emmet-language-server",
       intelephense  = "intelephense",
       -- Laravel-specific: completes config/view/route keys inside {{ }}. Only
       -- attaches in a real Laravel project (root marker: `artisan`).
