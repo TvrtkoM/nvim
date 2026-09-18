@@ -75,6 +75,22 @@ return {
           args = { "fmt", "--stdin-filepath", "$FILENAME" },
           stdin = true,
         },
+        -- php-cs-fixer 3.95+ refuses to run without a ruleset (it drops into an
+        -- interactive config-onboarding that fails non-interactively). Respect a
+        -- project's .php-cs-fixer(.dist).php when present; otherwise pass an
+        -- explicit ruleset so plain PHP files still format.
+        php_cs_fixer = {
+          args = function(_, ctx)
+            local has_config = vim.fs.find(
+              { ".php-cs-fixer.php", ".php-cs-fixer.dist.php" },
+              { path = ctx.dirname, upward = true }
+            )[1]
+            if has_config then
+              return { "fix", "$FILENAME" }
+            end
+            return { "fix", "--rules=@PER-CS", "$FILENAME" }
+          end,
+        },
       },
 
       -- Format on save. Returns nil (skip) when a toggle flag is set, so you

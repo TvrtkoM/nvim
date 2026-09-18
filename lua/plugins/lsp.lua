@@ -188,6 +188,19 @@ return {
       end,
     })
 
+    -- laravel_ls attaches to any php/blade buffer, but outside a Laravel project
+    -- (no `artisan`) it fails to initialize with RPC error "unknown scheme".
+    -- Gate attachment: only start it when an `artisan` root is found (don't call
+    -- on_dir otherwise, so it simply doesn't attach to standalone PHP files).
+    vim.lsp.config("laravel_ls", {
+      root_dir = function(bufnr, on_dir)
+        local root = vim.fs.root(vim.api.nvim_buf_get_name(bufnr), { "artisan" })
+        if root then
+          on_dir(root)
+        end
+      end,
+    })
+
     local servers = {
       vtsls         = "vtsls",
       lua_ls        = "lua-language-server",
