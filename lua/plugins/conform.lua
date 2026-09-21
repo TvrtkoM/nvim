@@ -57,7 +57,9 @@ return {
         -- python
         python          = { "ruff_organize_imports", "ruff_format" },
         -- php
-        php             = { "pint", "php_cs_fixer", stop_after_first = true }
+        php             = { "pint", "php_cs_fixer", stop_after_first = true },
+        -- blade: pint/php_cs_fixer don't touch templates; blade-formatter does.
+        blade           = { "blade-formatter" },
       },
 
       -- conform's built-in nixfmt recipe invokes the binary bare, which nixfmt
