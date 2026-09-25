@@ -82,16 +82,56 @@ return {
 
     -- 3. Per-server overrides. nvim-lspconfig already provides the base config
     --    for `vtsls`; this MERGES on top. Inlay hints are a nice TS extra.
-    vim.lsp.config("vtsls", {
-      settings = {
-        typescript = {
-          inlayHints = {
-            parameterNames = { enabled = "literals" },
-            variableTypes = { enabled = true },
-            functionLikeReturnTypes = { enabled = true },
-          },
+    --
+    -- Vue "hybrid mode": vue_ls owns the <template>/SFC, and vtsls handles the
+    -- <script> TypeScript in .vue files via @vue/typescript-plugin. The plugin
+    -- ships inside the nix vue-language-server package; derive its path from the
+    -- binary so it survives version bumps.
+    local function vue_ts_plugin_location()
+      local exe = vim.fn.exepath("vue-language-server")
+      if exe == "" then
+        return nil
+      end
+      local real = vim.uv.fs_realpath(exe) or exe
+      -- <store>/bin/vue-language-server -> <store>/lib/language-tools/packages/language-server
+      local loc = vim.fs.dirname(vim.fs.dirname(real))
+        .. "/lib/language-tools/packages/language-server"
+      return vim.uv.fs_stat(loc .. "/node_modules/@vue/typescript-plugin") and loc or nil
+    end
+
+    local vtsls_filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" }
+    local vtsls_settings = {
+      typescript = {
+        inlayHints = {
+          parameterNames = { enabled = "literals" },
+          variableTypes = { enabled = true },
+          functionLikeReturnTypes = { enabled = true },
         },
       },
+    }
+
+    -- Only enable Vue support when the plugin is actually present; otherwise
+    -- vtsls stays a plain TS server (no dangling vue filetype/plugin).
+    local vue_plugin_loc = vue_ts_plugin_location()
+    if vue_plugin_loc then
+      table.insert(vtsls_filetypes, "vue")
+      vtsls_settings.vtsls = {
+        tsserver = {
+          globalPlugins = {
+            {
+              name = "@vue/typescript-plugin",
+              location = vue_plugin_loc,
+              languages = { "vue" },
+              configNamespace = "typescript",
+            },
+          },
+        },
+      }
+    end
+
+    vim.lsp.config("vtsls", {
+      filetypes = vtsls_filetypes,
+      settings = vtsls_settings,
     })
 
     vim.lsp.config("eslint", {
@@ -213,6 +253,8 @@ return {
       ruff          = "ruff",
       tailwindcss   = "tailwindcss-language-server",
       emmet_language_server = "emmet-language-server",
+      -- Vue: vue_ls (Volar) in hybrid mode; pairs with the vtsls plugin above.
+      vue_ls        = "vue-language-server",
       intelephense  = "intelephense",
       -- Laravel-specific: completes config/view/route keys inside {{ }}. Only
       -- attaches in a real Laravel project (root marker: `artisan`).

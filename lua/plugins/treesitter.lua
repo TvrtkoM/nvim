@@ -15,6 +15,7 @@ local filetypes = {
   "jsonc",           -- tsconfig.json etc.; uses the json parser, which tolerates comments
   "html",
   "css",
+  "vue", -- .vue single-file components
   "lua", -- so editing this config looks good too
   "vim",
   "markdown",
@@ -51,6 +52,7 @@ local parsers = {
   -- highlights; install() does NOT pull it in automatically, hence listed.
   "html_tags",
   "css",
+  "vue", -- .vue SFCs; injects html/css/js/ts into the template & script blocks
   "lua",
   "vim",
   "vimdoc",
