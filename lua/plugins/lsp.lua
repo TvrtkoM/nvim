@@ -241,8 +241,20 @@ return {
       end,
     })
 
+    -- Attach the HTML and Emmet servers to blade buffers too, so .blade.php gets
+    -- HTML tag/attribute completion + hover and emmet expansion. Extend each
+    -- server's default filetypes rather than replacing them.
+    for _, name in ipairs({ "html", "emmet_language_server" }) do
+      local fts = vim.deepcopy(vim.lsp.config[name].filetypes or {})
+      if not vim.tbl_contains(fts, "blade") then
+        table.insert(fts, "blade")
+        vim.lsp.config(name, { filetypes = fts })
+      end
+    end
+
     local servers = {
       vtsls         = "vtsls",
+      html          = "vscode-html-language-server",
       lua_ls        = "lua-language-server",
       eslint        = "vscode-eslint-language-server",
       jsonls        = "vscode-json-language-server",
