@@ -58,6 +58,29 @@ return {
       -- (see the keymap above). They still expand via LuaSnip.
       default = { "lazydev", "lsp", "path", "buffer" },
       providers = {
+        lsp = {
+          -- Angular's control-flow block completions (@for, @if, ...) come with
+          -- an empty replace range at the request position instead of covering
+          -- the keyword already typed after `@`. Accepting `for` after typing
+          -- `@f` would give `@ffor (...)`. Widen the range back to the `@`.
+          transform_items = function(ctx, items)
+            for _, item in ipairs(items) do
+              local range = item.client_name == "angularls"
+                and item.detail == "block"
+                and item.textEdit
+                and item.textEdit.range
+              if range and range.start.line == range["end"].line then
+                local line = vim.api.nvim_buf_get_lines(ctx.bufnr, range.start.line, range.start.line + 1, false)[1] or ""
+                local ok, start_byte = pcall(vim.str_byteindex, line, "utf-16", range.start.character)
+                local at = ok and line:sub(1, start_byte):match("()@[%a ]*$")
+                if at then
+                  range.start.character = vim.str_utfindex(line, "utf-16", at)
+                end
+              end
+            end
+            return items
+          end,
+        },
         lazydev = {
           name = "LazyDev",
           module = "lazydev.integrations.blink",

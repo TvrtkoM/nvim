@@ -241,13 +241,48 @@ return {
       end,
     })
 
-    -- Attach the HTML and Emmet servers to blade buffers too, so .blade.php gets
-    -- HTML tag/attribute completion + hover and emmet expansion. Extend each
-    -- server's default filetypes rather than replacing them.
+    -- angularls: nvim-lspconfig's default already wires ngserver's probe paths to
+    -- the project's node_modules (the nix wrapper adds its bundled TS + language
+    -- service as fallback). Require a workspace (angular.json / nx.json) so it
+    -- doesn't start in every TS/HTML buffer of non-Angular projects.
+    --
+    -- `--includeCompletionsWithSnippetText` makes control-flow block completions
+    -- (@for, @if, @switch, @defer, ...) expand to full snippets, e.g.
+    -- `@for (item of items; track $index) {}`, like VS Code's Angular extension.
+    -- Without it the server only inserts the bare keyword. lspconfig's default
+    -- `cmd` builds the probe-path argv itself and passes it to vim.lsp.rpc.start,
+    -- so wrap that call to append the flag while keeping its probing logic.
+    local angularls_default_cmd = vim.lsp.config.angularls.cmd
+    vim.lsp.config("angularls", {
+      workspace_required = true,
+      cmd = function(dispatchers, config)
+        local rpc_start = vim.lsp.rpc.start
+        vim.lsp.rpc.start = function(cmd, ...)
+          return rpc_start(vim.list_extend(vim.deepcopy(cmd), { "--includeCompletionsWithSnippetText" }), ...)
+        end
+        local ok, client = pcall(angularls_default_cmd, dispatchers, config)
+        vim.lsp.rpc.start = rpc_start
+        if not ok then
+          error(client)
+        end
+        return client
+      end,
+    })
+
+    -- Attach the HTML and Emmet servers to blade and htmlangular buffers too, so
+    -- .blade.php and Angular templates (detected as `htmlangular`) get HTML
+    -- tag/attribute completion + hover and emmet expansion. Extend each server's
+    -- default filetypes rather than replacing them.
     for _, name in ipairs({ "html", "emmet_language_server" }) do
       local fts = vim.deepcopy(vim.lsp.config[name].filetypes or {})
-      if not vim.tbl_contains(fts, "blade") then
-        table.insert(fts, "blade")
+      local changed = false
+      for _, ft in ipairs({ "blade", "htmlangular" }) do
+        if not vim.tbl_contains(fts, ft) then
+          table.insert(fts, ft)
+          changed = true
+        end
+      end
+      if changed then
         vim.lsp.config(name, { filetypes = fts })
       end
     end
@@ -267,6 +302,9 @@ return {
       emmet_language_server = "emmet-language-server",
       -- Vue: vue_ls (Volar) in hybrid mode; pairs with the vtsls plugin above.
       vue_ls        = "vue-language-server",
+      -- Angular: template intelligence (.html / inline templates). Only
+      -- attaches inside an Angular workspace (see workspace_required above).
+      angularls     = "ngserver",
       intelephense  = "intelephense",
       -- Laravel-specific: completes config/view/route keys inside {{ }}. Only
       -- attaches in a real Laravel project (root marker: `artisan`).
