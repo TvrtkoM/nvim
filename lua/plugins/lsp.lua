@@ -269,6 +269,29 @@ return {
       end,
     })
 
+    -- angularls only loads a project once one of its .ts files is open, so a
+    -- template opened first gets no completions/hover. Load the component's .ts
+    -- (foo.html -> foo.ts or foo.component.ts) in a hidden buffer and attach.
+    vim.api.nvim_create_autocmd("LspAttach", {
+      callback = function(event)
+        local client = vim.lsp.get_client_by_id(event.data.client_id)
+        if not client or client.name ~= "angularls" or vim.bo[event.buf].filetype ~= "htmlangular" then
+          return
+        end
+        local base = vim.api.nvim_buf_get_name(event.buf):gsub("%.html$", "")
+        for _, ts in ipairs({ base .. ".ts", base .. ".component.ts" }) do
+          if vim.uv.fs_stat(ts) then
+            local ts_buf = vim.fn.bufadd(ts)
+            vim.fn.bufload(ts_buf)
+            if not vim.lsp.buf_is_attached(ts_buf, client.id) then
+              vim.lsp.buf_attach_client(ts_buf, client.id)
+            end
+            return
+          end
+        end
+      end,
+    })
+
     -- Attach the HTML and Emmet servers to blade and htmlangular buffers too, so
     -- .blade.php and Angular templates (detected as `htmlangular`) get HTML
     -- tag/attribute completion + hover and emmet expansion. Extend each server's
