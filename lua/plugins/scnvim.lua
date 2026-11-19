@@ -3,7 +3,7 @@
 --
 -- Filetype: scnvim ships its own detection for `.scd`/`.sc` (-> filetype
 -- `supercollider`); lazy sources that ftdetect because we set `ft` below, so
--- opening such a file loads the plugin. Our Treesitter fork already installs the
+-- opening such a file loads the plugin. nvim-treesitter already installs the
 -- `supercollider` parser and highlights this filetype (lua/plugins/treesitter.lua).
 --
 -- Prerequisite: SuperCollider installed (`sclang` on PATH). After first launch,

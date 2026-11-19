@@ -6,7 +6,7 @@ return {
   ft = { "markdown" }, -- nothing to render anywhere else
   -- nvim-web-devicons: the same icon provider oil/lualine already use (it
   -- previously pulled in mini.icons, a second icon library, just for this).
-  dependencies = { "neovim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
+  dependencies = { "nvim-treesitter/nvim-treesitter", "nvim-tree/nvim-web-devicons" },
   ---@module 'render-markdown'
   ---@type render.md.UserConfig
   opts = {

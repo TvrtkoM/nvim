@@ -1,30 +1,25 @@
 -- Treesitter: parses code into a syntax tree for accurate highlighting,
--- indentation, and folding. This is the MAINTAINED COMMUNITY FORK under the
--- `neovim-treesitter` org (the original `nvim-treesitter/nvim-treesitter` was
--- archived April 2026). It's a ground-up rewrite, so the setup looks different
--- from older tutorials: highlighting is NOT a config flag — you install parsers,
--- then turn highlighting on per-file via an autocommand (see config below).
-
--- Parsers/queries to install. (Treesitter parser names — note these differ
--- from filetype names: .tsx uses the "tsx" parser, etc.)
+-- indentation, and folding. This is nvim-treesitter's `main` branch — a
+-- ground-up rewrite (needs Neovim 0.12+ and the tree-sitter CLI), so the setup
+-- looks different from older tutorials: highlighting is NOT a config flag — you
+-- install parsers, then turn highlighting on per-file via an autocommand (see
+-- config below). Neovim itself only ships parsers for c, lua, markdown, query,
+-- vim and vimdoc; everything else comes from here.
 --
--- IMPORTANT: this fork distributes queries per-language and resolves shared
--- parent queries via the registry's "requires" field. TypeScript's highlights
--- query is `; inherits: ecma`, so we MUST also install the `ecma` (and, for
--- TSX, `jsx`) query packs — otherwise only TS-specific captures apply and the
--- file looks flat. These are registry "queries_only" entries (no parser).
+-- (We were briefly on the `neovim-treesitter` fork while the original was
+-- archived; it has since been unarchived and the fork deprecated.)
+
+-- Parsers to install. (Treesitter parser names — note these differ from
+-- filetype names: .tsx uses the "tsx" parser, etc.) Dependencies are pulled in
+-- automatically: typescript -> ecma, tsx -> ecma/jsx/typescript, php -> php_only,
+-- html/vue/angular -> html_tags.
 local parsers = {
-  "ecma", -- shared ECMAScript queries (parent of js/ts/tsx) -- REQUIRED
-  "jsx",  -- shared JSX queries (parent of tsx/jsx) -- REQUIRED for .tsx
   "typescript",
   "tsx",
   "javascript",
   "jsdoc",
   "json",
-  "html",
-  -- queries-only pack that `html` (and `blade`) inherit for tag/attribute
-  -- highlights; install() does NOT pull it in automatically, hence listed.
-  "html_tags",
+  "html", -- also what blade's highlights inherit (blade declares no dependency)
   "css",
   "vue", -- .vue SFCs; injects html/css/js/ts into the template & script blocks
   "lua",
@@ -36,9 +31,7 @@ local parsers = {
   "bash",
   "rust",
   "python",
-  "php",           -- outer grammar: HTML with <?php ?> islands
-  "php_only",      -- REQUIRED: code inside the tags is highlighted via an
-                   -- injection into this grammar; without it, PHP looks flat
+  "php",           -- outer grammar: HTML with <?php ?> islands (+ php_only inside)
   "phpdoc",        -- /** @param */ docblocks inside PHP
   "blade",         -- Laravel Blade; embeds html, injects php_only for {{ }}
   "nix",
@@ -48,15 +41,14 @@ local parsers = {
   "regex",         -- highlights regex literals inside JS/TS/Python/... strings
   "diff",          -- git diffs / :Gitsigns diffthis / patches
   "gitcommit",     -- commit message buffers
-  "query",         -- .scm query files (like the overrides in queries/)
+  "query",         -- .scm treesitter query files
   "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
   "supercollider", -- SuperDirt / SuperCollider .scd files
 }
 
 return {
-  "neovim-treesitter/nvim-treesitter",
-  -- The parser registry tells the plugin where to fetch each language grammar.
-  dependencies = { "neovim-treesitter/treesitter-parser-registry" },
+  "nvim-treesitter/nvim-treesitter",
+  branch = "main",     -- the rewrite; `master` is the frozen pre-0.12 version
   lazy = false,        -- the rewrite explicitly does not support lazy-loading
   build = ":TSUpdate", -- compile/update parsers when the plugin is installed/updated
 

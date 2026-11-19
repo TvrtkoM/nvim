@@ -1,6 +1,6 @@
 -- Haskell auto-indentation.
 --
--- WHY THIS EXISTS: our Treesitter fork ships an `indents.scm` query for almost
+-- WHY THIS EXISTS: nvim-treesitter ships an `indents.scm` query for almost
 -- every language, but NOT for haskell — its layout rule (significant, context-
 -- dependent whitespace) is too contextual to express as a tree-sitter indent
 -- query, so upstream never shipped one. HLS/haskell-tools doesn't do indentation

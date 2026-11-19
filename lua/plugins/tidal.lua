@@ -1,10 +1,10 @@
 -- tidal.nvim: live-code music with TidalCycles from Neovim. It boots a GHCi
 -- session with Tidal loaded and sends code from your buffer to it.
 --
--- NOTE: the upstream README lists `nvim-treesitter/nvim-treesitter` (the
--- ARCHIVED original) as a dependency to get the haskell parser. We deliberately
--- DROP that dep — our maintained fork (lua/plugins/treesitter.lua) already
--- installs the `haskell`/`supercollider` parsers. tidal.nvim itself sets
+-- NOTE: the upstream README lists `nvim-treesitter/nvim-treesitter` as a
+-- dependency to get the haskell parser. Not needed here: it's already loaded at
+-- startup (lazy = false) and lua/plugins/treesitter.lua installs the
+-- `haskell`/`supercollider` parsers. tidal.nvim itself sets
 -- `.tidal` files to filetype=haskell, so our treesitter highlight autocmd (which
 -- includes `haskell`) lights them up and the node-send feature gets its parser.
 --

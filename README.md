@@ -11,12 +11,12 @@ Install these **before** first launch (commands shown for Ubuntu/Debian):
 
 | Tool | Why | Install |
 |------|-----|---------|
-| **Neovim ≥ 0.12** | required by the Treesitter fork & LSP API | [neovim.io](https://neovim.io) |
+| **Neovim ≥ 0.12** | required by nvim-treesitter (`main`) & the LSP API | [neovim.io](https://neovim.io) |
 | **git** | plugin manager clones repos | `sudo apt install git` |
 | **Language servers + formatters** | LSP / format-on-save | Nix (`home.packages` or a project's `nix develop`) — see below |
 | **C compiler + make** | builds Treesitter parsers & fzf-native | `sudo apt install build-essential` |
 | **ripgrep** | Telescope live-grep | `sudo apt install ripgrep` |
-| **tree-sitter CLI** | the Treesitter fork builds parsers with it | see below |
+| **tree-sitter CLI** (≥ 0.26.1) | nvim-treesitter builds parsers with it | see below |
 | **A Nerd Font** | icons in completion / statusline / file tree | see below |
 
 ### tree-sitter CLI
@@ -73,8 +73,6 @@ nixfmt, ruff, pint / php-cs-fixer, blade-formatter, fourmolu.
   plus `gd`, `gD`, `<leader>ca/cr/cl`, `<leader>d`.
 - **ESLint** only attaches in projects that have an ESLint config + eslint in `node_modules`.
   It shows warnings only — no auto-fix. Prettier handles formatting.
-- The two files under `queries/tsx/` are intentional overrides that fix `.tsx`
-  highlighting/indentation gaps in the Treesitter fork — don't delete them.
 - **Haskell** IDE support ([haskell-tools.nvim]) is included but needs
   **haskell-language-server** on your PATH — install via [GHCup]
   (`ghcup install hls`), which keeps HLS matched to your project's GHC (more
@@ -86,7 +84,7 @@ nixfmt, ruff, pint / php-cs-fixer, blade-formatter, fourmolu.
 ## Live-coding music (TidalCycles & SuperCollider)
 
 Optional setup for algorithmic music. The Neovim plugins ([tidal.nvim],
-[scnvim]) are already in this config — they reuse the Treesitter fork's `haskell`
+[scnvim]) are already in this config — they reuse nvim-treesitter's `haskell`
 and `supercollider` parsers, so no extra editor setup is needed. You only need
 the **external** sound toolchain:
 
@@ -130,9 +128,7 @@ All keymaps are buffer-local and grouped under `<leader>t` / `<leader>s` in whic
 init.lua              entry point (leader keys + loads the modules below)
 lua/config/           options.lua, lazy.lua (plugin-manager bootstrap)
 lua/plugins/          one file per plugin, auto-imported by lazy.nvim
-queries/tsx/          local Treesitter query overrides for .tsx
 after/ftplugin/       per-filetype settings (haskell indent + repl keys, php indent, ...)
-after/queries/blade/  restores the html inheritance the parser installer strips
 ```
 
 To add a plugin: drop a new file in `lua/plugins/` returning its spec. To remove one:
