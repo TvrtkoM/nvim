@@ -283,6 +283,11 @@ return {
           if vim.uv.fs_stat(ts) then
             local ts_buf = vim.fn.bufadd(ts)
             vim.fn.bufload(ts_buf)
+            -- bufload() skips filetype detection; without it the buffer stays
+            -- ft='' (no Treesitter, no vtsls) when the .ts is opened later.
+            if vim.bo[ts_buf].filetype == "" then
+              vim.api.nvim_buf_call(ts_buf, function() vim.cmd("filetype detect") end)
+            end
             if not vim.lsp.buf_is_attached(ts_buf, client.id) then
               vim.lsp.buf_attach_client(ts_buf, client.id)
             end
