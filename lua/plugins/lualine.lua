@@ -1,17 +1,11 @@
--- lualine: the statusline at the bottom — mode, git branch/diff, LSP/ESLint
--- diagnostics, filename, filetype, and cursor position. Pulls git diff info
--- from gitsigns and diagnostics from the LSP layer automatically.
-
 return {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "nvim-tree/nvim-web-devicons" }, -- icons (Nerd Font)
-  event = "VeryLazy", -- statusline isn't needed during early startup
+  dependencies = { "nvim-tree/nvim-web-devicons" },
+  event = "VeryLazy",
   opts = {
     options = {
-      theme = "auto", -- match the active colorscheme (gruvbox)
-      globalstatus = false, -- one statusline PER window/split (sets laststatus=2)
+      theme = "auto",
+      globalstatus = false, -- one statusline per window
     },
-    -- Sections left at lualine's defaults: they already show mode | branch,
-    -- diff, diagnostics | filename | filetype | progress | location.
   },
 }

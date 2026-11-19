@@ -1,18 +1,11 @@
--- Telescope: fuzzy finder for files, project-wide grep, buffers, and LSP
--- symbols/references/diagnostics. Type to filter; <CR> opens the selection.
+-- Fuzzy finder.
 
 return {
   "nvim-telescope/telescope.nvim",
-  -- Loaded on first use (a keymap below or the :Telescope command).
   cmd = "Telescope",
   dependencies = {
-    "nvim-lua/plenary.nvim", -- required Lua utility library
-    {
-      -- Compiled C sorter for faster, better fuzzy matching. `build = "make"`
-      -- compiles it on install (needs make + a C compiler — both present).
-      "nvim-telescope/telescope-fzf-native.nvim",
-      build = "make",
-    },
+    "nvim-lua/plenary.nvim",
+    { "nvim-telescope/telescope-fzf-native.nvim", build = "make", },
   },
 
   keys = {
@@ -24,7 +17,6 @@ return {
     { "<leader>fr", function() require("telescope.builtin").resume() end, desc = "Resume last picker" },
     { "<leader>fs", function() require("telescope.builtin").lsp_document_symbols() end, desc = "Document symbols" },
     { "<leader>fd", function() require("telescope.builtin").diagnostics() end, desc = "Diagnostics" },
-    -- Word under cursor -> project grep
     { "<leader>fw", function() require("telescope.builtin").grep_string() end, desc = "Grep word under cursor" },
   },
 
@@ -32,15 +24,13 @@ return {
     local telescope = require("telescope")
     telescope.setup({
       defaults = {
-        -- Open results with the prompt at the top.
         sorting_strategy = "ascending",
         layout_config = { prompt_position = "top" },
       },
       extensions = {
-        fzf = {}, -- use the compiled native sorter
+        fzf = {},
       },
     })
-    -- Activate the fzf-native extension built above.
     telescope.load_extension("fzf")
   end,
 }

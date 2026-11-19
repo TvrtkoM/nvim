@@ -1,26 +1,15 @@
--- Formatting via conform.nvim. It runs a real formatter (prettierd) per
--- filetype, honoring your project's .prettierrc / prettier.config.js if present.
---
--- The formatter binaries come from Nix (home.packages, or a project's
--- `nix develop` shell). If formatting silently does nothing, check
--- :ConformInfo (which formatters were found) or ~/.local/state/nvim/conform.log.
+-- Formatting. Binaries come from Nix; debug with :ConformInfo.
 
--- Frontend filetypes vp (vite-plus/Oxfmt) can format. Use vp when the project
--- has it in node_modules (honoring its vite.config.ts `fmt` block); otherwise
--- fall back to prettierd. Shared table — conform reads it, never mutates it.
+-- Use the project's vp (vite-plus) if installed, else prettierd.
 local web = { "vp", "prettierd", stop_after_first = true }
 
 return {
-  -- The formatter runner.
   {
     "stevearc/conform.nvim",
-    -- Load right before a write (for format-on-save) or when used manually.
     event = { "BufWritePre" },
     cmd = { "ConformInfo" },
     keys = {
       {
-        -- Moved off <leader>f to avoid clashing with the <leader>f find group
-        -- (which-key). "cf" = code format.
         "<leader>cf",
         function()
           require("conform").format({ async = true, lsp_format = "fallback" })
@@ -30,8 +19,6 @@ return {
       },
     },
     opts = {
-      -- Which formatter to run for each filetype. prettierd is the Prettier
-      -- daemon (kept warm in the background = near-instant formatting).
       formatters_by_ft = {
         typescript      = web,
         typescriptreact = web,
@@ -43,38 +30,22 @@ return {
         scss            = web,
         less            = web,
         html            = web,
-        -- Angular templates. Without this entry, lsp_format="fallback" handed
-        -- them to the HTML language server, which doesn't understand Angular
-        -- syntax (@if/@for blocks, [bindings]). Prettier picks its `angular`
-        -- parser for *.component.html.
         htmlangular     = web,
         vue             = web,
         markdown        = web,
         yaml            = web,
         graphql         = web,
-        -- Real Haskell files. NOTE: `.tidal` files are also filetype=haskell but
-        -- are TidalCycles code, not Haskell projects — format_on_save below skips
-        -- them so fourmolu never rewrites your patterns.
-        haskell         = { "fourmolu" },
+        haskell         = { "fourmolu" }, -- .tidal files are skipped below
         rust            = { "rustfmt" },
-        -- nixfmt = the RFC-166 style, what nixpkgs itself uses.
         nix             = { "nixfmt" },
-        -- python
         python          = { "ruff_organize_imports", "ruff_format" },
-        -- php
         php             = { "pint", "php_cs_fixer", stop_after_first = true },
-        -- blade: pint/php_cs_fixer don't touch templates; blade-formatter does.
         blade           = { "blade-formatter" },
       },
 
-      -- conform's built-in nixfmt recipe invokes the binary bare, which nixfmt
-      -- now warns is deprecated for stdin; "-" is the supported spelling.
       formatters = {
-        nixfmt = { args = { "-" } },
-        -- require() is wrapped in functions so it runs when conform calls them
-        -- (plugin loaded), not at spec-load time (which crashes: util not yet
-        -- on the runtimepath). command resolves node_modules/.bin/vp per project,
-        -- so the formatter is simply unavailable (→ prettierd) where vp isn't installed.
+        nixfmt = { args = { "-" } }, -- read stdin explicitly (avoids a nixfmt warning)
+        -- Resolves node_modules/.bin/vp per project; unavailable elsewhere.
         vp = {
           command = function(self, ctx)
             return require("conform.util").find_executable({ "node_modules/.bin/vp" }, "vp")(self, ctx)
@@ -82,10 +53,7 @@ return {
           args = { "fmt", "--stdin-filepath", "$FILENAME" },
           stdin = true,
         },
-        -- php-cs-fixer 3.95+ refuses to run without a ruleset (it drops into an
-        -- interactive config-onboarding that fails non-interactively). Respect a
-        -- project's .php-cs-fixer(.dist).php when present; otherwise pass an
-        -- explicit ruleset so plain PHP files still format.
+        -- php-cs-fixer needs a ruleset: use the project's config, else @PER-CS.
         php_cs_fixer = {
           args = function(_, ctx)
             local has_config = vim.fs.find(
@@ -100,26 +68,21 @@ return {
         },
       },
 
-      -- Format on save. Returns nil (skip) when a toggle flag is set, so you
-      -- can disable it globally or per-buffer (see the commands below).
       format_on_save = function(bufnr)
         if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
           return
         end
-        -- Never run fourmolu on TidalCycles buffers (filetype=haskell but .tidal).
+        -- TidalCycles code, not a Haskell project.
         if vim.api.nvim_buf_get_name(bufnr):match("%.tidal$") then
           return
         end
-        -- lsp_format = "fallback": if no prettierd for this ft, let the LSP
-        -- format instead. timeout guards against a hung formatter on save.
         return { timeout_ms = 1000, lsp_format = "fallback" }
       end,
     },
     config = function(_, opts)
       require("conform").setup(opts)
 
-      -- :FormatDisable  -> turn off format-on-save (add ! for current buffer only)
-      -- :FormatEnable   -> turn it back on
+      -- :FormatDisable (! = this buffer only) / :FormatEnable
       vim.api.nvim_create_user_command("FormatDisable", function(args)
         if args.bang then
           vim.b.disable_autoformat = true

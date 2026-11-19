@@ -1,55 +1,29 @@
--- LSP: the language-server layer. This is what gives you type errors, hover
--- docs, go-to-definition, references, rename, and code actions for TypeScript.
---
--- The stack (modern Neovim 0.11+ way):
---   * nix                 -> installs the server BINARIES (home.packages, or a
---                            project's `nix develop` shell for per-project tools)
---   * nvim-lspconfig      -> ships the per-server default configs (cmd, root dir, ...)
---   * vim.lsp.config()    -> Neovim core API for per-server overrides
---   * vim.lsp.enable()    -> Neovim core API that actually starts a server; called
---                            from the guarded loop at the bottom of this file
+-- Language servers. Binaries come from Nix; nvim-lspconfig provides default
+-- configs, vim.lsp.config() overrides them, vim.lsp.enable() starts them.
 
 return {
   "neovim/nvim-lspconfig",
   dependencies = {
-    -- Listed here so blink is loaded before this config runs, making its
-    -- completion capabilities available below.
-    "saghen/blink.cmp",
-    -- Loaded before lua_ls is enabled below, so lua_ls attaches with lazydev's
-    -- Neovim type library already in place (no transient undefined-global flash).
-    "folke/lazydev.nvim",
-    -- Bundles the schemastore.org catalog so jsonls knows which schema applies to
-    -- tsconfig.json, package.json, etc. — this is what gives VSCode-style JSON
-    -- completion + validation. A library (no setup/spec of its own).
-    "b0o/SchemaStore.nvim",
+    "saghen/blink.cmp", -- capabilities below
+    "folke/lazydev.nvim", -- must load before lua_ls starts
+    "b0o/SchemaStore.nvim", -- JSON schemas for jsonls
   },
   config = function()
-    -- Tell every language server that our client (via blink.cmp) supports rich
-    -- completion + snippets. `vim.lsp.config('*', ...)` applies to all servers.
     vim.lsp.config("*", {
       capabilities = require("blink.cmp").get_lsp_capabilities(),
     })
 
-    -- 1. Diagnostics display. Minimal, non-intrusive: no inline message text at
-    --    all (no virtual_text, no virtual_lines). The always-on indicators are
-    --    the sign-column marker (E/W — WHICH lines have problems) and an underline
-    --    under the exact offending span. Press <leader>d to open a float with the
-    --    full diagnostic message(s) for the current line on demand.
+    -- Diagnostics: signs + underline only; full message via <leader>d.
     vim.diagnostic.config({
       virtual_text = false,
       virtual_lines = false,
-      signs = true,     -- E/W markers in the sign column: the global "here be errors" map
-      underline = true, -- squiggle under the exact offending token
+      signs = true,
+      underline = true,
       severity_sort = true,
-      update_in_insert = true,
-      -- Border comes from the global `winborder` option (options.lua).
-      float = { source = true }, -- the <leader>d float: also name the server
+      update_in_insert = true, -- otherwise diagnostics from other files don't redraw in insert mode
+      float = { source = true },
     })
 
-    -- Toggle virtual_lines on/off. Default view is clean (signs + underline only);
-    -- press this to reveal the full diagnostic message BELOW the current line
-    -- (wraps properly — good for HLS's long multi-line type errors), press again
-    -- to return to the clean default.
     vim.keymap.set("n", "<leader>uv", function()
       local cfg = vim.diagnostic.config()
       if cfg.virtual_lines then
@@ -59,11 +33,6 @@ return {
       end
     end, { desc = "Toggle diagnostic virtual lines" })
 
-    -- Inlay hints (inline type / parameter-name annotations). The vtsls and
-    -- rust-analyzer settings below only tell the SERVER to compute them;
-    -- Neovim draws nothing until vim.lsp.inlay_hint.enable() is called.
-    -- Enabled globally (applies to every current and future buffer whose
-    -- server supports them); <leader>uh toggles them when they get noisy.
     vim.lsp.inlay_hint.enable(true)
     vim.keymap.set("n", "<leader>uh", function()
       vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
@@ -71,13 +40,7 @@ return {
 
     local lsp_group = vim.api.nvim_create_augroup("user_lsp", { clear = true })
 
-    -- 2. Buffer-local keymaps, set only once a server attaches to a buffer.
-    --    Neovim 0.12 already provides these by default, so they're NOT remapped:
-    --      K  hover          grr references       gri implementation
-    --      grn rename        gra code action      grt type definition
-    --      gO document symbols   [d / ]d prev/next diagnostic   <C-w>d float
-    --    (Mapping a bare `gr` here would make every `gr` wait out timeoutlen,
-    --    because it's also the prefix of all the gr* defaults above.)
+    -- Built-in defaults used as-is: K, grr, gri, grn, gra, grt, gO, [d, ]d.
     vim.api.nvim_create_autocmd("LspAttach", {
       group = lsp_group,
       callback = function(event)
@@ -93,13 +56,8 @@ return {
       end,
     })
 
-    -- 3. Per-server overrides. nvim-lspconfig already provides the base config
-    --    for `vtsls`; this MERGES on top. Inlay hints are a nice TS extra.
-    --
-    -- Vue "hybrid mode": vue_ls owns the <template>/SFC, and vtsls handles the
-    -- <script> TypeScript in .vue files via @vue/typescript-plugin. The plugin
-    -- ships inside the nix vue-language-server package; derive its path from the
-    -- binary so it survives version bumps.
+    -- Vue hybrid mode: vue_ls handles templates, vtsls handles <script> via
+    -- @vue/typescript-plugin, found inside the vue-language-server package.
     local function vue_ts_plugin_location()
       local exe = vim.fn.exepath("vue-language-server")
       if exe == "" then
@@ -123,8 +81,6 @@ return {
       },
     }
 
-    -- Only enable Vue support when the plugin is actually present; otherwise
-    -- vtsls stays a plain TS server (no dangling vue filetype/plugin).
     local vue_plugin_loc = vue_ts_plugin_location()
     if vue_plugin_loc then
       table.insert(vtsls_filetypes, "vue")
@@ -151,9 +107,6 @@ return {
       settings = { workingDirectory = { mode = "location" } }
     })
 
-    -- jsonls: JSON completion/validation from schemas. Feed it the schemastore
-    -- catalog (matched to files by name) so tsconfig.json, package.json, etc. get
-    -- the same schema-driven autocomplete as VSCode. Attaches to json + jsonc.
     vim.lsp.config("jsonls", {
       settings = {
         json = {
@@ -163,8 +116,7 @@ return {
       },
     })
 
-    -- cssls flags Tailwind's @tailwind/@apply/@screen as unknown at-rules;
-    -- silence that (tailwindcss LSP handles those) while keeping other CSS lint.
+    -- Tailwind at-rules (@apply, ...) are handled by tailwindcss.
     vim.lsp.config("cssls", {
       settings = {
         css = { lint = { unknownAtRules = "ignore" } },
@@ -176,8 +128,6 @@ return {
     vim.lsp.config("rust_analyzer", {
       settings = {
         ["rust-analyzer"] = {
-          -- Use clippy instead of plain `cargo check` for on-save diagnostics:
-          -- same type errors, plus clippy's lint suggestions.
           checkOnSave = true,
           check = { command = "clippy" },
           cargo = { allFeatures = true },
@@ -188,11 +138,7 @@ return {
         },
       },
     })
-    -- nixd: Nix LSP, installed declaratively via home.packages.
-    --
-    -- nixpkgs.expr gives package-name completion + hover on `pkgs.<...>`.
-    -- NixOS *option* completion would need an additional options.nixos.expr
-    -- pointing at this machine's evaluated config; deliberately left out.
+
     vim.lsp.config("nixd", {
       settings = {
         nixd = {
@@ -201,8 +147,6 @@ return {
       },
     })
 
-    -- basedpyright handles types; we turn OFF its formatting/linting-ish bits and
-    -- let ruff own those, so the two servers don't fight.
     vim.lsp.config("basedpyright", {
       settings = {
         basedpyright = {
@@ -214,8 +158,7 @@ return {
       },
     })
 
-    -- ruff as an LSP: live lint diagnostics + code actions (organize imports, fixes).
-    -- We defer hover to basedpyright to avoid duplicate hover popups.
+    -- Hover comes from basedpyright.
     vim.lsp.config("ruff", {
       on_attach = function(client)
         client.server_capabilities.hoverProvider = false
@@ -223,8 +166,6 @@ return {
     })
 
     vim.lsp.config("intelephense", {
-      -- Also attach in blade: intelephense still gives PHP intel inside the
-      -- file's real <?php ?> regions (not inside {{ }} — that's laravel_ls).
       filetypes = { "php", "blade" },
       settings = {
         intelephense = {
@@ -232,8 +173,7 @@ return {
         }
       },
       on_attach = function(client, bufnr)
-        -- In blade, intelephense flags @directives/{{ }} as PHP syntax errors.
-        -- Silence its diagnostics there; keep everything else.
+        -- Blade syntax shows up as PHP errors; mute its diagnostics there.
         if vim.bo[bufnr].filetype == "blade" then
           local ns = vim.lsp.diagnostic.get_namespace(client.id)
           vim.diagnostic.enable(false, { bufnr = bufnr, ns_id = ns })
@@ -241,10 +181,7 @@ return {
       end,
     })
 
-    -- laravel_ls attaches to any php/blade buffer, but outside a Laravel project
-    -- (no `artisan`) it fails to initialize with RPC error "unknown scheme".
-    -- Gate attachment: only start it when an `artisan` root is found (don't call
-    -- on_dir otherwise, so it simply doesn't attach to standalone PHP files).
+    -- Only in Laravel projects (fails to start without `artisan`).
     vim.lsp.config("laravel_ls", {
       root_dir = function(bufnr, on_dir)
         local root = vim.fs.root(vim.api.nvim_buf_get_name(bufnr), { "artisan" })
@@ -254,17 +191,9 @@ return {
       end,
     })
 
-    -- angularls: nvim-lspconfig's default already wires ngserver's probe paths to
-    -- the project's node_modules (the nix wrapper adds its bundled TS + language
-    -- service as fallback). Require a workspace (angular.json / nx.json) so it
-    -- doesn't start in every TS/HTML buffer of non-Angular projects.
-    --
-    -- `--includeCompletionsWithSnippetText` makes control-flow block completions
-    -- (@for, @if, @switch, @defer, ...) expand to full snippets, e.g.
-    -- `@for (item of items; track $index) {}`, like VS Code's Angular extension.
-    -- Without it the server only inserts the bare keyword. lspconfig's default
-    -- `cmd` builds the probe-path argv itself and passes it to vim.lsp.rpc.start,
-    -- so wrap that call to append the flag while keeping its probing logic.
+    -- Only in Angular workspaces. The extra flag makes @for/@if/... completions
+    -- expand to full snippets; it's appended by wrapping the rpc.start call
+    -- that lspconfig's default cmd makes, keeping its node_modules probing.
     local angularls_default_cmd = vim.lsp.config.angularls.cmd
     vim.lsp.config("angularls", {
       workspace_required = true,
@@ -282,9 +211,8 @@ return {
       end,
     })
 
-    -- angularls only loads a project once one of its .ts files is open, so a
-    -- template opened first gets no completions/hover. Load the component's .ts
-    -- (foo.html -> foo.ts or foo.component.ts) in a hidden buffer and attach.
+    -- angularls ignores a template until its component .ts is open, so load
+    -- foo.ts / foo.component.ts in the background and attach to it.
     vim.api.nvim_create_autocmd("LspAttach", {
       group = lsp_group,
       callback = function(event)
@@ -297,8 +225,7 @@ return {
           if vim.uv.fs_stat(ts) then
             local ts_buf = vim.fn.bufadd(ts)
             vim.fn.bufload(ts_buf)
-            -- bufload() skips filetype detection; without it the buffer stays
-            -- ft='' (no Treesitter, no vtsls) when the .ts is opened later.
+            -- bufload() skips filetype detection.
             if vim.bo[ts_buf].filetype == "" then
               vim.api.nvim_buf_call(ts_buf, function() vim.cmd("filetype detect") end)
             end
@@ -311,10 +238,7 @@ return {
       end,
     })
 
-    -- Attach the HTML and Emmet servers to blade and htmlangular buffers too, so
-    -- .blade.php and Angular templates (detected as `htmlangular`) get HTML
-    -- tag/attribute completion + hover and emmet expansion. Extend each server's
-    -- default filetypes rather than replacing them.
+    -- Add blade and Angular templates to the html and emmet servers.
     for _, name in ipairs({ "html", "emmet_language_server" }) do
       local fts = vim.deepcopy(vim.lsp.config[name].filetypes or {})
       local changed = false
@@ -329,6 +253,7 @@ return {
       end
     end
 
+    -- server name -> executable; enabled only if the executable is on PATH
     local servers = {
       vtsls         = "vtsls",
       html          = "vscode-html-language-server",
@@ -342,18 +267,11 @@ return {
       ruff          = "ruff",
       tailwindcss   = "tailwindcss-language-server",
       emmet_language_server = "emmet-language-server",
-      -- Vue: vue_ls (Volar) in hybrid mode; pairs with the vtsls plugin above.
       vue_ls        = "vue-language-server",
-      -- Angular: template intelligence (.html / inline templates). Only
-      -- attaches inside an Angular workspace (see workspace_required above).
       angularls     = "ngserver",
       intelephense  = "intelephense",
-      -- Laravel-specific: completes config/view/route keys inside {{ }}. Only
-      -- attaches in a real Laravel project (root marker: `artisan`).
       laravel_ls    = "laravel-ls",
     }
-    -- Re-runnable: devshell servers (rust-analyzer) only land on PATH once
-    -- direnv exports, which is after startup. Idempotent via `enabled`.
     local enabled = {}
     local function enable_available_servers()
       for server, bin in pairs(servers) do
@@ -366,7 +284,7 @@ return {
 
     enable_available_servers()
 
-    -- direnv.vim fires this after applying the exported env, so PATH is updated.
+    -- Re-check once direnv has loaded a project's environment (devshell servers).
     vim.api.nvim_create_autocmd("User", {
       group = lsp_group,
       pattern = "DirenvLoaded",

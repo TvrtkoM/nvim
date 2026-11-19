@@ -56,7 +56,7 @@ Verify with `:Lazy` (plugins), `:checkhealth vim.lsp`, and `:ConformInfo` (forma
 
 ### Language servers & formatters
 
-There is no Mason: binaries come from Nix and are found on `PATH`. `lua/plugins/lsp.lua`
+Binaries come from Nix and are found on `PATH`. `lua/plugins/lsp.lua`
 enables a server **only if its executable exists**, and re-checks when direnv loads a
 project's environment — so a server provided by a project's `nix develop` shell starts
 as soon as you `cd` into it. Servers: vtsls, eslint, html, cssls, jsonls, tailwindcss,
@@ -75,8 +75,8 @@ nixfmt, ruff, pint / php-cs-fixer, blade-formatter, fourmolu.
   It shows warnings only — no auto-fix. Prettier handles formatting.
 - **Haskell** IDE support ([haskell-tools.nvim]) is included but needs
   **haskell-language-server** on your PATH — install via [GHCup]
-  (`ghcup install hls`), which keeps HLS matched to your project's GHC (more
-  reliable than Mason). Formatting uses **fourmolu** through conform (HLS's own
+  (`ghcup install hls`), which keeps HLS matched to your project's GHC.
+  Formatting uses **fourmolu** through conform (HLS's own
   formatter is disabled). `.tidal` files share `filetype=haskell` but are *not*
   Haskell projects, so HLS is auto-detached from them and fourmolu never runs on
   them.

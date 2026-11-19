@@ -1,45 +1,20 @@
--- tidal.nvim: live-code music with TidalCycles from Neovim. It boots a GHCi
--- session with Tidal loaded and sends code from your buffer to it.
---
--- NOTE: the upstream README lists `nvim-treesitter/nvim-treesitter` as a
--- dependency to get the haskell parser. Not needed here: it's already loaded at
--- startup (lazy = false) and lua/plugins/treesitter.lua installs the
--- `haskell`/`supercollider` parsers. tidal.nvim itself sets
--- `.tidal` files to filetype=haskell, so our treesitter highlight autocmd (which
--- includes `haskell`) lights them up and the node-send feature gets its parser.
---
--- Prerequisites (system, install separately): GHC + the `tidal` Haskell package
--- (via cabal/ghcup), and SuperCollider + SuperDirt for actual sound. See README.
+-- TidalCycles live coding. Needs GHC + the `tidal` package, and SuperCollider +
+-- SuperDirt for sound. The plugin sets .tidal files to filetype=haskell.
 
 return {
   "grddavies/tidal.nvim",
-  -- Load on the file pattern, NOT `ft`: tidal.nvim doesn't use a `tidal`
-  -- filetype — it's the plugin's own autocmd that switches `.tidal` buffers to
-  -- filetype=haskell. So an `ft = "tidal"` trigger would never fire. Loading on
-  -- BufReadPre/BufNewFile of *.tidal runs setup() before BufWinEnter, so the
-  -- plugin's autocmd then catches the buffer and sets ft + keymaps.
+  -- Not `ft`: there is no `tidal` filetype to trigger on.
   event = { "BufReadPre *.tidal", "BufNewFile *.tidal" },
-  -- NOTE: we intentionally do NOT load tidal.nvim for `supercollider` buffers.
-  -- SuperCollider editing is handled by scnvim (lua/plugins/scnvim.lua); letting
-  -- both grab .scd files would double up keymaps/interpreters.
-  -- Launch/quit the GHCi session. Deliberately NOT declared under lazy's `keys`:
-  -- that creates global loading stubs in every buffer, so <leader>t showed up in
-  -- which-key everywhere. They are mapped buffer-local in after/ftplugin/haskell.lua.
+  -- Launch/quit keys are buffer-local in after/ftplugin/haskell.lua.
   cmd = { "TidalLaunch", "TidalQuit" },
   opts = {
-    -- Remap every default send/silence keymap under <leader>t. (Defaults were
-    -- <S-CR>/<M-CR>/<leader><CR>/<leader>d/<leader><Esc>.) These are set
-    -- buffer-local by tidal.nvim's autocmd in .tidal and .scd buffers.
     mappings = {
-      send_line = { mode = "n", key = "<leader>tl" }, -- send current Line
-      send_visual = { mode = "x", key = "<leader>ts" }, -- send Selection
-      send_block = { mode = { "n", "x" }, key = "<leader>tb" }, -- send Block
-      send_node = { mode = "n", key = "<leader>tn" }, -- send Treesitter Node
-      send_silence = { mode = "n", key = "<leader>td" }, -- silence dN (count1)
-      send_hush = { mode = "n", key = "<leader>th" }, -- Hush all patterns
+      send_line = { mode = "n", key = "<leader>tl" },
+      send_visual = { mode = "x", key = "<leader>ts" },
+      send_block = { mode = { "n", "x" }, key = "<leader>tb" },
+      send_node = { mode = "n", key = "<leader>tn" },
+      send_silence = { mode = "n", key = "<leader>td" }, -- count = channel, e.g. 2<leader>td
+      send_hush = { mode = "n", key = "<leader>th" },
     },
-    -- Defaults otherwise sensible. Common things you might set later:
-    -- boot = { tidal = { file = ..., args = ... }, sclang = { enabled = true } },
-    -- split = "v", -- "v" vertical / "h" horizontal GHCi output split
   },
 }

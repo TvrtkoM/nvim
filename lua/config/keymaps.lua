@@ -1,17 +1,9 @@
--- In any terminal buffer (Claude split included), <C-q> leaves insert/terminal
--- mode and enters Terminal-Normal mode for scrolling/yanking. We avoid <Esc>
--- here on purpose so Esc still passes through to programs that use it (Claude
--- uses Esc to interrupt). Press i/a to start typing again.
+-- Leave terminal mode. Not <Esc>, so Esc still reaches terminal apps (e.g. Claude).
 vim.keymap.set("t", "<C-q>", [[<C-\><C-n>]], { desc = "Terminal: enter Normal mode" })
 
--- Press <Esc> to clear the leftover search highlight (in addition to its normal
--- job). The highlight stays while you n/N through matches; one tap clears it,
--- so you no longer need to type :nohlsearch manually.
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
 
--- Yank a Claude-style file reference (@path#L12 or @path#L12-L34) for the current
--- line or visual selection into the system clipboard, ready to paste into Claude.
--- Path is relative to nvim's cwd (":." modifier) — the dir Claude runs in.
+-- Copy a Claude file reference (@path#L12 or @path#L12-L34), path relative to cwd.
 local function yank_claude_ref(visual)
   local path = vim.fn.expand("%:.")
   if path == "" then
@@ -37,8 +29,7 @@ vim.keymap.set("n", "<leader>ay", function() yank_claude_ref(false) end,
 vim.keymap.set("x", "<leader>ay", function() yank_claude_ref(true) end,
   { desc = "Yank @file#L range ref" })
 
--- Increase/Decrease/Reset font size — only meaningful in the Neovide GUI, so
--- don't claim these keys in terminal Neovim.
+-- Font zoom (Neovide only).
 if vim.g.neovide then
   local function scale(factor)
     return function()

@@ -1,8 +1,4 @@
--- Entry point. Keep this file tiny: it just loads modules from lua/.
--- `require("config.options")` loads lua/config/options.lua, and so on.
-
--- Leader keys MUST be set before lazy.nvim loads, because plugins read them
--- when they register their keymaps. Space is the common, ergonomic choice.
+-- Leader must be set before plugins load, since they read it when mapping keys.
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
