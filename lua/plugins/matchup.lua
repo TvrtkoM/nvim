@@ -8,7 +8,10 @@
 return {
   "andymass/vim-matchup",
   init = function()
-    -- Show the off-screen match in the status line instead of a popup window.
-    vim.g.matchup_matchparen_offscreen = { method = "status_manual" }
+    -- When the match is off-screen (e.g. the `{` of a long function), show its
+    -- line in a small popup at the top of the window. ("status_manual" — the
+    -- previous value — only computes the text and never displays it unless the
+    -- statusline calls MatchupStatusOffscreen(), which lualine doesn't.)
+    vim.g.matchup_matchparen_offscreen = { method = "popup" }
   end,
 }

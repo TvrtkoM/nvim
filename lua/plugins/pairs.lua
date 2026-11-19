@@ -12,7 +12,9 @@ return {
   },
 
   -- Auto-close and auto-rename HTML/JSX/TSX tags using Treesitter. Typing
-  -- `<div>` adds `</div>`; editing one tag name updates its pair.
+  -- `<div>` adds `</div>`; editing one tag name updates its pair. The plugin
+  -- already treats vue/htmlangular/blade/php as html; it just has to be loaded
+  -- for those filetypes too.
   {
     "windwp/nvim-ts-autotag",
     ft = {
@@ -22,6 +24,10 @@ return {
       "javascriptreact",
       "typescriptreact",
       "markdown",
+      "vue",
+      "htmlangular",
+      "blade",
+      "php",
     },
     opts = {},
   },

@@ -37,11 +37,15 @@ vim.keymap.set("n", "<leader>ay", function() yank_claude_ref(false) end,
 vim.keymap.set("x", "<leader>ay", function() yank_claude_ref(true) end,
   { desc = "Yank @file#L range ref" })
 
--- Increase/Decrease/Reset font size in Neovide
-vim.keymap.set("n", "<C-+>", function()
-  vim.g.neovide_scale_factor = (vim.g.neovide_scale_factor or 1.0) * 1.25
-end)
-vim.keymap.set("n", "<C-->", function()
-  vim.g.neovide_scale_factor = (vim.g.neovide_scale_factor or 1.0) * 0.8
-end)
-vim.keymap.set("n", "<C-0>", function() vim.g.neovide_scale_factor = 1.0 end)
+-- Increase/Decrease/Reset font size — only meaningful in the Neovide GUI, so
+-- don't claim these keys in terminal Neovim.
+if vim.g.neovide then
+  local function scale(factor)
+    return function()
+      vim.g.neovide_scale_factor = factor and (vim.g.neovide_scale_factor or 1.0) * factor or 1.0
+    end
+  end
+  vim.keymap.set("n", "<C-+>", scale(1.25), { desc = "Neovide: zoom in" })
+  vim.keymap.set("n", "<C-->", scale(0.8), { desc = "Neovide: zoom out" })
+  vim.keymap.set("n", "<C-0>", scale(nil), { desc = "Neovide: reset zoom" })
+end

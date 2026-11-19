@@ -42,7 +42,8 @@ return {
       underline = true, -- squiggle under the exact offending token
       severity_sort = true,
       update_in_insert = true,
-      float = { border = "rounded", source = true }, -- the <leader>d / hover float
+      -- Border comes from the global `winborder` option (options.lua).
+      float = { source = true }, -- the <leader>d float: also name the server
     })
 
     -- Toggle virtual_lines on/off. Default view is clean (signs + underline only);
@@ -58,25 +59,37 @@ return {
       end
     end, { desc = "Toggle diagnostic virtual lines" })
 
+    -- Inlay hints (inline type / parameter-name annotations). The vtsls and
+    -- rust-analyzer settings below only tell the SERVER to compute them;
+    -- Neovim draws nothing until vim.lsp.inlay_hint.enable() is called.
+    -- Enabled globally (applies to every current and future buffer whose
+    -- server supports them); <leader>uh toggles them when they get noisy.
+    vim.lsp.inlay_hint.enable(true)
+    vim.keymap.set("n", "<leader>uh", function()
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
+    end, { desc = "Toggle inlay hints" })
+
+    local lsp_group = vim.api.nvim_create_augroup("user_lsp", { clear = true })
+
     -- 2. Buffer-local keymaps, set only once a server attaches to a buffer.
-    --    (Neovim 0.11 has some built-in LSP defaults like K=hover, grn=rename,
-    --    gra=code action, grr=references; these add friendlier aliases.)
+    --    Neovim 0.12 already provides these by default, so they're NOT remapped:
+    --      K  hover          grr references       gri implementation
+    --      grn rename        gra code action      grt type definition
+    --      gO document symbols   [d / ]d prev/next diagnostic   <C-w>d float
+    --    (Mapping a bare `gr` here would make every `gr` wait out timeoutlen,
+    --    because it's also the prefix of all the gr* defaults above.)
     vim.api.nvim_create_autocmd("LspAttach", {
+      group = lsp_group,
       callback = function(event)
         local map = function(keys, fn, desc)
           vim.keymap.set("n", keys, fn, { buffer = event.buf, desc = "LSP: " .. desc })
         end
         map("gd", vim.lsp.buf.definition, "Goto definition")
         map("gD", vim.lsp.buf.declaration, "Goto declaration")
-        map("gi", vim.lsp.buf.implementation, "Goto implementation")
-        map("gr", vim.lsp.buf.references, "References")
-        map("K", vim.lsp.buf.hover, "Hover docs")
         map("<leader>ca", vim.lsp.buf.code_action, "Code action")
         map("<leader>cl", vim.lsp.codelens.run, "Run code lens")
         map("<leader>cr", vim.lsp.buf.rename, "Rename symbol")
         map("<leader>d", vim.diagnostic.open_float, "Line diagnostics")
-        map("[d", function() vim.diagnostic.jump({ count = -1 }) end, "Prev diagnostic")
-        map("]d", function() vim.diagnostic.jump({ count = 1 }) end, "Next diagnostic")
       end,
     })
 
@@ -273,6 +286,7 @@ return {
     -- template opened first gets no completions/hover. Load the component's .ts
     -- (foo.html -> foo.ts or foo.component.ts) in a hidden buffer and attach.
     vim.api.nvim_create_autocmd("LspAttach", {
+      group = lsp_group,
       callback = function(event)
         local client = vim.lsp.get_client_by_id(event.data.client_id)
         if not client or client.name ~= "angularls" or vim.bo[event.buf].filetype ~= "htmlangular" then
@@ -354,6 +368,7 @@ return {
 
     -- direnv.vim fires this after applying the exported env, so PATH is updated.
     vim.api.nvim_create_autocmd("User", {
+      group = lsp_group,
       pattern = "DirenvLoaded",
       callback = enable_available_servers,
     })

@@ -24,7 +24,6 @@ return {
     "ClaudeCodeDiffDeny",
   },
   keys = {
-    { "<leader>a", nil, desc = "ai (claude)" },
     { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
     { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
     { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select model" },

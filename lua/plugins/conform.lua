@@ -2,8 +2,8 @@
 -- filetype, honoring your project's .prettierrc / prettier.config.js if present.
 --
 -- The formatter binaries come from Nix (home.packages, or a project's
--- `nix develop` shell),
--- or errors — check :ConformInfo, or ~/.local/state/nvim/conform.log.
+-- `nix develop` shell). If formatting silently does nothing, check
+-- :ConformInfo (which formatters were found) or ~/.local/state/nvim/conform.log.
 
 -- Frontend filetypes vp (vite-plus/Oxfmt) can format. Use vp when the project
 -- has it in node_modules (honoring its vite.config.ts `fmt` block); otherwise
@@ -43,6 +43,11 @@ return {
         scss            = web,
         less            = web,
         html            = web,
+        -- Angular templates. Without this entry, lsp_format="fallback" handed
+        -- them to the HTML language server, which doesn't understand Angular
+        -- syntax (@if/@for blocks, [bindings]). Prettier picks its `angular`
+        -- parser for *.component.html.
+        htmlangular     = web,
         vue             = web,
         markdown        = web,
         yaml            = web,

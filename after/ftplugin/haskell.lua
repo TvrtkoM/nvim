@@ -63,9 +63,11 @@ rmap("n", "<leader>re", ht.repl.reload, "Reload repl (:r)")
 rmap("n", "<leader>rq", ht.repl.quit, "Quit repl")
 rmap("n", "<leader>rt", ht.repl.cword_type, "Type of word (:t)")
 rmap("n", "<leader>ri", ht.repl.cword_info, "Info on word (:i)")
--- Send code to the repl: yank then paste into the GHCi session.
-rmap("n", "<leader>rp", function() vim.cmd("normal! yy") ht.repl.paste() end, "Send line to repl")
-rmap("x", "<leader>rp", function() vim.cmd("normal! y") ht.repl.paste() end, "Send selection to repl")
+-- Send code to the repl: yank into register h, then paste that into GHCi. A
+-- named register keeps this from overwriting your system clipboard
+-- (clipboard=unnamedplus would otherwise make every send replace it).
+rmap("n", "<leader>rp", function() vim.cmd('normal! "hyy') ht.repl.paste("h") end, "Send line to repl")
+rmap("x", "<leader>rp", function() vim.cmd('normal! "hy') ht.repl.paste("h") end, "Send selection to repl")
 
 -- Other haskell-tools features (not repl), under <leader>h.
 rmap("n", "<leader>hh", ht.hoogle.hoogle_signature, "Hoogle signature (cword)")

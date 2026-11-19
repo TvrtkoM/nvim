@@ -5,32 +5,6 @@
 -- from older tutorials: highlighting is NOT a config flag — you install parsers,
 -- then turn highlighting on per-file via an autocommand (see config below).
 
--- Filetypes we want Treesitter active for. (Neovim filetype names.)
-local filetypes = {
-  "typescript",
-  "typescriptreact", -- .tsx
-  "javascript",
-  "javascriptreact", -- .jsx
-  "json",
-  "jsonc",           -- tsconfig.json etc.; uses the json parser, which tolerates comments
-  "html",
-  "css",
-  "vue", -- .vue single-file components
-  "lua", -- so editing this config looks good too
-  "vim",
-  "markdown",
-  "bash",
-  "rust",
-  "php",
-  "php_only",
-  "phpdoc",
-  "blade",
-  "python",
-  "nix",
-  "haskell",       -- also covers TidalCycles: tidal.nvim sets .tidal files to filetype=haskell
-  "supercollider", -- .scd SuperCollider files (SuperDirt sound engine)
-}
-
 -- Parsers/queries to install. (Treesitter parser names — note these differ
 -- from filetype names: .tsx uses the "tsx" parser, etc.)
 --
@@ -68,6 +42,13 @@ local parsers = {
   "phpdoc",        -- /** @param */ docblocks inside PHP
   "blade",         -- Laravel Blade; embeds html, injects php_only for {{ }}
   "nix",
+  "angular",       -- Angular templates (filetype htmlangular); inherits html
+  "yaml",
+  "toml",
+  "regex",         -- highlights regex literals inside JS/TS/Python/... strings
+  "diff",          -- git diffs / :Gitsigns diffthis / patches
+  "gitcommit",     -- commit message buffers
+  "query",         -- .scm query files (like the overrides in queries/)
   "haskell",       -- TidalCycles is a Haskell DSL; .tidal buffers use this parser
   "supercollider", -- SuperDirt / SuperCollider .scd files
 }
@@ -83,26 +64,31 @@ return {
     -- Make sure the parsers we listed are installed (runs async in background).
     require("nvim-treesitter").install(parsers)
 
-    -- Turn on Treesitter features whenever we open one of these filetypes.
+    -- Turn on Treesitter for ANY buffer whose filetype has an installed
+    -- parser. Neovim maps filetype -> parser itself (sh -> bash, htmlangular ->
+    -- angular, typescriptreact -> tsx, ...), so there's no second hand-kept
+    -- filetype list to drift out of sync with `parsers` above. Buffers with no
+    -- parser (oil, telescope prompts, plain text) make start() error, which
+    -- pcall swallows — they simply keep regex/no highlighting.
     vim.api.nvim_create_autocmd("FileType", {
-      pattern = filetypes,
-      callback = function()
-        -- 1. Highlighting (resolves the right parser for this buffer's filetype).
-        vim.treesitter.start()
-
-        -- 2. Indentation driven by the syntax tree (great for JSX/TSX). Only wire
-        --    this up for languages that actually ship an `indents` query. Haskell
-        --    does NOT (its layout rule is too contextual for a tree-sitter indent
-        --    query), so for .hs/.tidal we leave indentexpr to our own ftplugin
-        --    (after/ftplugin/haskell.lua) instead of clobbering it with a no-op.
-        local lang = vim.treesitter.language.get_lang(vim.bo.filetype) or vim.bo.filetype
-        if vim.treesitter.query.get(lang, "indents") then
-          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      group = vim.api.nvim_create_augroup("user_treesitter", { clear = true }),
+      callback = function(args)
+        if not pcall(vim.treesitter.start, args.buf) then
+          return
         end
 
-        -- NOTE: folding via Treesitter is already configured globally in
-        -- lua/config/options.lua (foldmethod=expr, foldexpr=treesitter). With
-        -- parsers now installed, that folding actually works for these files.
+        -- Indentation driven by the syntax tree (great for JSX/TSX). Only wire
+        -- this up for languages that actually ship an `indents` query. Haskell
+        -- does NOT (its layout rule is too contextual for a tree-sitter indent
+        -- query), so for .hs/.tidal we leave indentexpr to our own ftplugin
+        -- (after/ftplugin/haskell.lua) instead of clobbering it with a no-op.
+        local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+        if lang and vim.treesitter.query.get(lang, "indents") then
+          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+
+        -- NOTE: folding via Treesitter is configured globally in
+        -- lua/config/options.lua (foldmethod=expr, foldexpr=treesitter).
       end,
     })
   end,

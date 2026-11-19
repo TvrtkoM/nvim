@@ -1,7 +1,8 @@
-# Neovim — TypeScript IDE config
+# Neovim config
 
-A modular Neovim setup for TypeScript/React development: Treesitter, LSP (vtsls + ESLint),
-completion, Prettier formatting, fuzzy finding, git signs, and more. Managed by
+A modular Neovim setup centred on web development (TypeScript/React, Vue, Angular,
+PHP/Laravel) plus Rust, Python, Nix and Haskell: Treesitter, LSP, completion,
+format-on-save, fuzzy finding, git signs, and more. Managed by
 [lazy.nvim](https://github.com/folke/lazy.nvim).
 
 ## Prerequisites
@@ -12,7 +13,7 @@ Install these **before** first launch (commands shown for Ubuntu/Debian):
 |------|-----|---------|
 | **Neovim ≥ 0.12** | required by the Treesitter fork & LSP API | [neovim.io](https://neovim.io) |
 | **git** | plugin manager clones repos | `sudo apt install git` |
-| **Node.js + npm** | runs vtsls, eslint, prettierd | [nvm](https://github.com/nvm-sh/nvm) or distro pkg |
+| **Language servers + formatters** | LSP / format-on-save | Nix (`home.packages` or a project's `nix develop`) — see below |
 | **C compiler + make** | builds Treesitter parsers & fzf-native | `sudo apt install build-essential` |
 | **ripgrep** | Telescope live-grep | `sudo apt install ripgrep` |
 | **tree-sitter CLI** | the Treesitter fork builds parsers with it | see below |
@@ -48,16 +49,28 @@ git clone <this-repo> ~/.config/nvim     # or copy the files there
 nvim
 ```
 
-On first launch, automatically: lazy.nvim installs plugins, **Mason** installs the language
-servers + formatter (`vtsls`, `lua_ls`, `eslint`, `prettierd`), and **Treesitter** compiles
+On first launch, automatically: lazy.nvim installs plugins and **Treesitter** compiles
 its parsers. Wait for it to finish, then **restart nvim**.
 
-Verify with `:Lazy` (plugins), `:Mason` (tools), and `:checkhealth`.
+Verify with `:Lazy` (plugins), `:checkhealth vim.lsp`, and `:ConformInfo` (formatters).
+
+### Language servers & formatters
+
+There is no Mason: binaries come from Nix and are found on `PATH`. `lua/plugins/lsp.lua`
+enables a server **only if its executable exists**, and re-checks when direnv loads a
+project's environment — so a server provided by a project's `nix develop` shell starts
+as soon as you `cd` into it. Servers: vtsls, eslint, html, cssls, jsonls, tailwindcss,
+emmet, vue_ls, angularls, intelephense, laravel_ls, lua_ls, rust_analyzer, basedpyright,
+ruff, nixd. Formatters (conform.nvim): prettierd (or the project's `vp`), rustfmt,
+nixfmt, ruff, pint / php-cs-fixer, blade-formatter, fourmolu.
 
 ## Notes
 
-- **prettierd** sometimes doesn't finish auto-installing on the first run. If formatting
-  doesn't work, run `:MasonInstall prettierd` (or `npm i -g @fsouza/prettierd`).
+- Format-on-save is on; `:FormatDisable` (`!` for this buffer only) / `:FormatEnable`.
+- Inlay hints are on; `<leader>uh` toggles them. `<leader>uv` toggles full diagnostic
+  messages under the current line.
+- LSP keys are Neovim's built-ins (`K`, `grr`, `gri`, `grn`, `gra`, `grt`, `[d`/`]d`)
+  plus `gd`, `gD`, `<leader>ca/cr/cl`, `<leader>d`.
 - **ESLint** only attaches in projects that have an ESLint config + eslint in `node_modules`.
   It shows warnings only — no auto-fix. Prettier handles formatting.
 - The two files under `queries/tsx/` are intentional overrides that fix `.tsx`
@@ -118,6 +131,8 @@ init.lua              entry point (leader keys + loads the modules below)
 lua/config/           options.lua, lazy.lua (plugin-manager bootstrap)
 lua/plugins/          one file per plugin, auto-imported by lazy.nvim
 queries/tsx/          local Treesitter query overrides for .tsx
+after/ftplugin/       per-filetype settings (haskell indent + repl keys, php indent, ...)
+after/queries/blade/  restores the html inheritance the parser installer strips
 ```
 
 To add a plugin: drop a new file in `lua/plugins/` returning its spec. To remove one:
